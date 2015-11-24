@@ -1,0 +1,85 @@
+LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmakemodules)
+
+IF(WIN32)
+	cmake_minimum_required(VERSION 3.1.3)
+	set_property(GLOBAL PROPERTY USE_FOLDERS On)
+ELSE()
+	cmake_minimum_required(VERSION 3.1.3)
+ENDIF()
+
+project(OpenVEILPythonWrapper C CXX)
+
+IF(WIN32)
+	if(MSVC_IDE)
+		set(TS_INSTALL_PREFIX       "c:/TecSec/OpenVEIL_7-0")
+	else(MSVC_IDE)
+		set(TS_INSTALL_PREFIX       "c:/TecSec/OpenVEIL_7-0")
+	endif(MSVC_IDE)
+	set(TS_INSTALL_PREFIX_DEBUG   "c:/TecSec/OpenVEIL_7-0")
+	set(TS_INSTALL_PREFIX_RELEASE "c:/TecSec/OpenVEIL_7-0")
+ELSE(WIN32)
+	SET(TS_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/../local" CACHE STRING "The install path to use for Linux")
+ENDIF(WIN32)
+
+set(TS_MODULE OpenVEILPython)
+
+include(tecsec_top)
+include(precompiled.header)
+set(TS_INSTALL_PREFIX ${TS_INSTALL_PREFIX}/${TS_TOOLSET})
+include (tecsec_installdirs)
+
+include(summary)
+include(${ALLBIN_DIR}/OpenVEILVersion.cmake)
+
+set(CMAKE_BUILD_TYPE ${TS_VS_CONFIG} CACHE STRING "The configuration build type")
+if (CMAKE_CONFIGURATION_TYPES)
+  set (CMAKE_CONFIGURATION_TYPES ${TS_VS_CONFIG})
+  set (CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING "Reset the configurations for ${VEILCORENAME}" )
+endif()
+
+set(VEIL_COPYRIGHT "Copyright (C) 2015 TecSec, Inc.  All Rights Reserved Worldwide.")
+
+set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../boost_1_59_0;${CMAKE_CURRENT_SOURCE_DIR}/../boost;C:/Program Files/boost_1_59_0)
+set(Boost_USE_MULTITHREADED ON)
+# set(Boost_DEBUG ON)
+set(Boost_USE_STATIC_LIBS       OFF)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+
+FIND_PACKAGE(Boost COMPONENTS python REQUIRED)
+FIND_PACKAGE(PythonInterp)
+FIND_PACKAGE(PythonLibs)
+message(STATUS PYTHONLIBS_FOUND = ${PYTHONLIBS_FOUND})
+message(STATUS PYTHON_LIBRARIES = ${PYTHON_LIBRARIES})
+message(STATUS PYTHON_INCLUDE_PATH = ${PYTHON_INCLUDE_PATH})
+message(STATUS PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS})
+message(STATUS PYTHON_DEBUG_LIBRARIES = ${PYTHON_DEBUG_LIBRARIES})
+message(STATUS PYTHONLIBS_VERSION_STRING = ${PYTHONLIBS_VERSION_STRING})
+message(STATUS )
+message(STATUS Boost_INCLUDE_DIRS = ${Boost_INCLUDE_DIRS})
+message(STATUS Boost_LIBRARY_DIRS = ${Boost_LIBRARY_DIRS})
+message(STATUS Boost_PYTHON3_LIBRARY = ${Boost_PYTHON3_LIBRARY})
+message(STATUS Boost_LIBRARIES = ${Boost_LIBRARIES})
+
+if(PYTHONLIBS_FOUND)
+  include_directories(${PYTHON_INCLUDE_PATH})
+endif()
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+  link_directories(${Boost_LIBRARY_DIRS})
+endif()
+
+add_uninstall()
+
+add_subdirectory(src)
+
+summary()
+
+CopyImportTargetBinaries(OpenVEILCore ${BIN_DIR})
+list(GET Boost_LIBRARIES 1 _tmp)
+get_filename_component(__boostPath ${_tmp} DIRECTORY)
+get_filename_component(__boostFile ${_tmp} NAME_WE)
+install(FILES ${__boostPath}/${__boostFile}${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${BIN_DIR})
+
+# DumpAllVariables()
+# get_filename_component(__pythonPath ${PYTHON_EXECUTABLE} DIRECTORY)
+# install(FILES ${__pythonPath}/python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${BIN_DIR})

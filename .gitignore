@@ -1,0 +1,27 @@
+.vs
+*.user
+*.bak*
+*.old
+*.aps
+*.layout
+*.pdb
+*.suo
+*.opensdf
+*~
+*.sdf
+lib
+obj
+ipch
+x64
+bin
+Debug
+Release
+Symbols
+Win32
+Build
+
+#Python Specific
+__pycache__/
+*.py[cod]
+
+
