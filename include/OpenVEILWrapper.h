@@ -28,24 +28,222 @@
 //	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "OpenVEIL.h"
-#include <boost/python.hpp>
-
 #pragma once
-class OpenVEILWrapper
+
+#include "OpenVEIL.h"
+#include "CmsHeader.h"
+#include "FileVEILSupport.h"
+#include <boost/python.hpp>
+#include <deque>
+#include <vector>
+
+typedef uint8_t byte;
+typedef boost::python::object byte_array;
+
+class Environment
 {
 public:
-	OpenVEILWrapper();
-	~OpenVEILWrapper();
-	int genericConnectToServer(const std::string& url, const std::string& username, const std::string& password);
-	int connectToServer(const std::string& url, const std::string& username, const std::string& password);
-	void disconnect();
-	bool isConnected();
-	boost::python::tuple sendJsonRequest(const std::string& verb, const std::string& cmd, const std::string& inData);
-	boost::python::tuple sendBase64Request(const std::string& verb, const std::string& cmd, const std::string& inData);
+	Environment();
+	~Environment();
+
+	void DispatchEvents(); // Call this in the main thread to receive queued up events
+	bool InitializeVEIL(bool initiateChangeMonitoring);
+	bool TerminateVEIL();
+private:
+	//std::deque<QueuedVEILEvent> _events;
+};
+
+class Connector
+{
+public:
+	Connector();
+	Connector(Connector&& obj) : conn(std::move(obj.conn)) {}
+	Connector(const Connector& obj) : conn(obj.conn) {}
+	virtual ~Connector();
+	Connector& operator=(Connector&& obj) {
+		if (this != &obj) { conn = std::move(obj.conn); }
+	}
+	virtual void release();
+	virtual void disconnect();
+	virtual bool isConnected();
+	virtual boost::python::tuple sendJsonRequest(const std::string& verb, const std::string& cmd, const std::string& inData);
+	virtual boost::python::tuple sendBase64Request(const std::string& verb, const std::string& cmd, const boost::python::object& inData);
 protected:
 	std::shared_ptr<IKeyVEILConnector> conn;
-private:
+	bool isReady();
+	ConnectionStatus __genericConnectToServer(const std::string& url, const std::string& username, const std::string& password);
+	ConnectionStatus __connectToServer(const std::string& url, const std::string& username, const std::string& password);
+};
+
+class FavoriteWrapper;
+
+class SessionWrapper
+{
+public:
+	SessionWrapper();
+	SessionWrapper(std::shared_ptr<IKeyVEILSession> _sess);
+	SessionWrapper(SessionWrapper&& obj) : _session(std::move(obj._session)) {}
+	SessionWrapper(const SessionWrapper& obj) : _session(obj._session) {}
+	~SessionWrapper();
+	SessionWrapper& operator=(SessionWrapper&& obj) {
+		if (this != &obj) { _session = std::move(obj._session); }
+	}
+
+	void release();
+	void close();
+	LoginStatus Login(const std::string& pin);
+	bool IsLoggedIn();
+	bool Logout();
+	//bool GenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, std::function<bool(Asn1::CTS::CkmCombineParameters&, tsData&)> headerCallback, tsData &WorkingKey);
+	//bool RegenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, tsData &WorkingKey);
+	boost::python::dict getProfile();
+	bool IsLocked();
+	size_t retriesLeft();
+	bool IsValid();
+	SessionWrapper Duplicate();
+	bool encryptFileUsingFavorite(FavoriteWrapper fav, const std::string& sourceFile, bool compress, const std::string& encryptedFile);
+	bool decryptFile(const std::string& encryptedFile, const std::string& decryptedFile);
+	byte_array encryptDataUsingFavorite(FavoriteWrapper fav, const boost::python::object& sourceData, bool compress);
+	byte_array decryptData(const boost::python::object& encryptedData);
+
+	std::shared_ptr<IKeyVEILSession> handle() { return _session; }
+
+protected:
+	std::shared_ptr<IKeyVEILSession> _session;
+
 	bool isReady();
 };
 
+class FavoriteWrapper
+{
+public:
+	FavoriteWrapper();
+	FavoriteWrapper(std::shared_ptr<IFavorite> _fav);
+	FavoriteWrapper(FavoriteWrapper&& obj) : _favorite(std::move(obj._favorite)) {}
+	FavoriteWrapper(const FavoriteWrapper& obj) : _favorite(obj._favorite) {}
+	~FavoriteWrapper();
+	FavoriteWrapper& operator=(FavoriteWrapper&& obj) {
+		if (this != &obj) { _favorite = std::move(obj._favorite); }
+	}
+
+	void release();
+
+	std::string getFavoriteId();
+	void setFavoriteId(const std::string& setTo);
+
+	std::string getEnterpriseId();
+	void setEnterpriseId(const std::string& setTo);
+
+	std::string getFavoriteName();
+	void setFavoriteName(const std::string& setTo);
+
+	std::string getTokenSerialNumber();
+	void setTokenSerialNumber(const std::string& setTo);
+
+	byte_array getHeaderData();
+	void setHeaderData(const boost::python::object& setTo);
+
+	bool encryptFile(SessionWrapper session, const std::string& sourceFile, bool compress, const std::string& encryptedFile);
+	byte_array encryptData(SessionWrapper session, const boost::python::object& sourceData, bool compress);
+
+protected:
+	std::shared_ptr<IFavorite> _favorite;
+
+	bool isReady();
+};
+
+class TokenWrapper
+{
+public:
+	TokenWrapper();
+	TokenWrapper(std::shared_ptr<IToken> _tok);
+	TokenWrapper(TokenWrapper&& obj) : _token(std::move(obj._token)) {}
+	TokenWrapper(const TokenWrapper& obj) : _token(obj._token) {}
+	~TokenWrapper();
+	TokenWrapper& operator=(TokenWrapper&& obj) {
+		if (this != &obj) { _token = std::move(obj._token); }
+	}
+
+	void release();
+
+	std::string getTokenName();
+	bool setTokenName(const std::string& setTo);
+	byte_array serialNumber();
+	std::string id();
+	std::string enterpriseName();
+	std::string memberName();
+	std::string tokenType();
+	std::string enterpriseId();
+	std::string memberId();
+
+	SessionWrapper openSession();
+
+protected:
+	std::shared_ptr<IToken> _token;
+
+	bool isReady();
+};
+
+class KeyVEILConnectorWrapper : public Connector
+{
+public:
+	KeyVEILConnectorWrapper();
+	virtual ~KeyVEILConnectorWrapper();
+	ConnectionStatus connectToServer(const std::string& url, const std::string& username, const std::string& password);
+	bool refresh();
+	size_t tokenCount();
+	TokenWrapper tokenByIndex(size_t index);
+	TokenWrapper tokenByName(const std::string& tokenName);
+	TokenWrapper tokenBySerialNumber(const boost::python::object& serialNumber);
+	TokenWrapper tokenById(const std::string& id);
+
+	size_t favoriteCount();
+	FavoriteWrapper favoriteByIndex(size_t index);
+	FavoriteWrapper favoriteByName(const std::string& name);
+	FavoriteWrapper favoriteById(const std::string& id);
+	//std::string CreateFavorite(TokenWrapper token, const std::string& headerData, const std::string& name);
+	//std::string CreateFavorite(const std::string& tokenId, const std::string& headerData, const std::string& name);
+	//std::string CreateFavorite(const tsData& tokenSerial, const std::string& headerData, const std::string& name);
+	bool DeleteFavorite(const std::string& id);
+	bool UpdateFavoriteName(const std::string& id, const std::string& name);
+	//bool UpdateFavorite(const std::string& id, const tsData& setTo);
+	size_t tokenCountForEnterpriseId(const std::string& enterpriseId);
+	TokenWrapper tokenForEnterprise(const std::string& enterpriseId, size_t index);
+	size_t favoriteCountForEnterprise(const std::string& enterpriseId);
+	FavoriteWrapper favoriteForEnterprise(const std::string& enterpriseId, size_t index);
+};
+
+class GenericConnectorWrapper : public Connector
+{
+public:
+	GenericConnectorWrapper();
+	virtual ~GenericConnectorWrapper();
+	ConnectionStatus connectToServer(const std::string& url, const std::string& username, const std::string& password);
+};
+
+
+
+// Used in the file encrypt and decrypt routines
+class StatusClass : public IFileVEILOperationStatus, public tsmod::IObject
+{
+public:
+	StatusClass() {}
+	virtual bool Status(const tsAscii& taskName, int taskNumber, int ofTaskCount, int taskPercentageDone)
+	{
+		//if (g_doStatus)
+		//{
+		//	ts_out << "Task " << taskNumber << " of " << ofTaskCount << " " << taskName << " " << taskPercentageDone << "%" << endl;
+		//}
+		return true;
+	}
+	virtual void    FailureReason(const tsAscii&failureText)
+	{
+		//ERROR(failureText);
+	}
+
+private:
+	virtual ~StatusClass() {}
+};
+
+extern tsData tsDataFromPyObject(const boost::python::object& obj);
+extern boost::python::object tsDataToPyObject(const tsData& data);
