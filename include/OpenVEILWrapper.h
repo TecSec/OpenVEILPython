@@ -29,7 +29,6 @@
 //
 
 #pragma once
-
 #include "OpenVEIL.h"
 #include "CmsHeader.h"
 #include "FileVEILSupport.h"

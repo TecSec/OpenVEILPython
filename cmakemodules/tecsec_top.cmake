@@ -264,7 +264,7 @@ IF(WIN32)
 	SET(ZLIB_ROOT S:/ThirdParty/redist)
 	SET(BZ2_ROOT S:/ThirdParty/redist)
 	SET(HARU_ROOT S:/ThirdParty/redist)
-	SET(BOOST_ROOT S:/ThirdParty/redist)
+	# SET(BOOST_ROOT S:/ThirdParty/redist)
 ENDIF(WIN32)
 
 

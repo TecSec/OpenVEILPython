@@ -82,9 +82,9 @@ bool SessionWrapper::Logout()
 //}
 
 static void JSONToDictionary(const JSONObject& obj, boost::python::dict& d);
-static void JSONArrayToList(const std::vector<JSONField>& ary, boost::python::list& r)
+static void JSONArrayToList(const JSONFieldList& ary, boost::python::list& r)
 {
-	std::for_each(ary.begin(), ary.end(), [&r](const JSONField& fld) {
+	std::for_each(ary->begin(), ary->end(), [&r](const JSONField& fld) {
 		switch (fld.Type())
 		{
 		case JSONField::jsonNull:
@@ -120,7 +120,7 @@ static void JSONArrayToList(const std::vector<JSONField>& ary, boost::python::li
 }
 static void JSONToDictionary(const JSONObject& obj, boost::python::dict& d)
 {
-	std::for_each(obj.Fields().begin(), obj.Fields().end(), [&d](const JSONField& fld) {
+	std::for_each(obj.Fields()->begin(), obj.Fields()->end(), [&d](const JSONField& fld) {
 		switch (fld.Type())
 		{
 		case JSONField::jsonNull:

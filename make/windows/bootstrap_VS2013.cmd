@@ -29,6 +29,13 @@ rem	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THI
 rem	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 rem
 
+if not defined PYTHON_PATH (
+    echo Error: PYTHON_PATH not set.
+    exit /b 1
+) else (
+    echo PYTHON_PATH="%PYTHON_PATH%"
+)
+
 if not exist ..\..\Build md ..\..\Build
 if exist ..\..\Build\resetenv.cmd goto okToBootstrap
 copy resetenv.cmd.in ..\..\Build\resetenv.cmd.in

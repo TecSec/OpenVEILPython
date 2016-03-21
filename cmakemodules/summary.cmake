@@ -36,7 +36,6 @@ set(_output_results "
 Summary of CMake build system results for the TecSec component
 
 Library options:
-TSF_FULL_VERSION:               ${TSF_FULL_VERSION}
 TS_X_PLATFORM:                  ${TS_X_PLATFORM}
 TS_TOOLSET:                     ${TS_TOOLSET}
 CMAKE_VS_PLATFORM_TOOLSET:      ${CMAKE_VS_PLATFORM_TOOLSET}
@@ -54,11 +53,12 @@ MSVC:               ${MSVC} (MSVC_VERSION:  ${MSVC_VERSION})
 MINGW:              ${MINGW}
 MSYS:               ${MSYS}
 CYGWIN:             ${CYGWIN}
+ANDROID:            ${ANDROID}
 
 CMAKE_BUILD_TYPE:               ${CMAKE_BUILD_TYPE}
 CMAKE_C_COMPILER CMAKE_C_FLAGS: ${CMAKE_C_COMPILER}
-CMAKE_C_FLAGS:                  ${CMAKE_C_FLAGS}
-CMAKE_CXX_FLAGS:                ${CMAKE_CXX_FLAGS}
+CMAKE_C_FLAGS:                  ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${TS_CONFIG}}
+CMAKE_CXX_FLAGS:                ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${TS_CONFIG}}
 CMAKE_EXECUTABLE_SUFFIX:        ${CMAKE_EXECUTABLE_SUFFIX}
 CMAKE_SHARED_MODULE_PREFIX:     ${CMAKE_SHARED_MODULE_PREFIX}
 CMAKE_SHARED_MODULE_SUFFIX:     ${CMAKE_SHARED_MODULE_SUFFIX}

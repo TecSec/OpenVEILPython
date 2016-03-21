@@ -29,6 +29,13 @@ rem	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THI
 rem	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 rem
 
+if not defined PYTHON_PATH (
+    echo Error: PYTHON_PATH not set.
+    exit /b 1
+) else (
+    echo PYTHON_PATH="%PYTHON_PATH%"
+)
+
 if not exist ..\..\Build md ..\..\Build
 if exist ..\..\Build\resetenv.cmd goto okToBootstrap
 copy resetenv.cmd.in ..\..\Build\resetenv.cmd.in
@@ -58,28 +65,29 @@ echo ===========================================================================
 
  
   
-echo ============================================================================
-  if not exist vsdebug-vc14-x64 md vsdebug-vc14-x64
-  pushd vsdebug-vc14-x64
-  if not exist resetenv.cmd copy ..\resetenv.cmd . & echo call "%VS140COMNTOOLS%\..\..\vc\vcvarsall" amd64 >> resetenv.cmd
-  call resetenv
-  cmake -DTS_VS_CONFIG=Debug -G "Visual Studio 14 Win64" ..\..
-  popd
+REM echo ============================================================================
+  REM if not exist vsdebug-vc14-x64 md vsdebug-vc14-x64
+  REM pushd vsdebug-vc14-x64
+  REM if not exist resetenv.cmd copy ..\resetenv.cmd . & echo call "%VS140COMNTOOLS%\..\..\vc\vcvarsall" amd64 >> resetenv.cmd
+  REM call resetenv
+  REM cmake -DTS_VS_CONFIG=Debug -G "Visual Studio 14 Win64" ..\..
+  REM popd
   
-echo ============================================================================
-  if not exist vsrelease-vc14-x64 md vsrelease-vc14-x64
-  pushd vsrelease-vc14-x64
-  if not exist resetenv.cmd copy ..\resetenv.cmd . & echo call "%VS140COMNTOOLS%\..\..\vc\vcvarsall" amd64 >> resetenv.cmd
-  call resetenv
-  cmake -DTS_VS_CONFIG=Release -G "Visual Studio 14 Win64" ..\..
-  popd
+REM echo ============================================================================
+  REM if not exist vsrelease-vc14-x64 md vsrelease-vc14-x64
+  REM pushd vsrelease-vc14-x64
+  REM if not exist resetenv.cmd copy ..\resetenv.cmd . & echo call "%VS140COMNTOOLS%\..\..\vc\vcvarsall" amd64 >> resetenv.cmd
+  REM call resetenv
+  REM cmake -DTS_VS_CONFIG=Release -G "Visual Studio 14 Win64" ..\..
+  REM popd
   
   
 echo @echo off > buildall-vc14.cmd
 echo SETLOCAL ENABLEEXTENSIONS > buildall-vc14.cmd
 echo for %%%%i in (debug release) do ( >> buildall-vc14.cmd
 echo    for %%%%j in (vc14) do ( >> buildall-vc14.cmd
-echo      for %%%%k in (x86 x64) do ( >> buildall-vc14.cmd
+REM echo      for %%%%k in (x86 x64) do ( >> buildall-vc14.cmd
+echo      for %%%%k in (x86) do ( >> buildall-vc14.cmd
 echo 		pushd vs%%%%i-%%%%j-%%%%k >> buildall-vc14.cmd
 echo        call resetenv.cmd >> buildall-vc14.cmd
 echo 		cmake --build . --target install --config %%%%i >> buildall-vc14.cmd
@@ -100,7 +108,8 @@ echo @echo off > buildrelease-vc14.cmd
 echo SETLOCAL ENABLEEXTENSIONS > buildrelease-vc14.cmd
 echo for %%%%i in (release) do ( >> buildrelease-vc14.cmd
 echo    for %%%%j in (vc14) do ( >> buildrelease-vc14.cmd
-echo      for %%%%k in (x86 x64) do ( >> buildrelease-vc14.cmd
+REM echo      for %%%%k in (x86 x64) do ( >> buildrelease-vc14.cmd
+echo      for %%%%k in (x86) do ( >> buildrelease-vc14.cmd
 echo 		pushd vs%%%%i-%%%%j-%%%%k >> buildrelease-vc14.cmd
 echo        call resetenv.cmd >> buildrelease-vc14.cmd
 echo 		cmake --build . --target uninstall --config %%%%i >> buildrelease-vc14.cmd
@@ -122,7 +131,8 @@ echo @echo off > cleanall-vc14.cmd
 echo SETLOCAL ENABLEEXTENSIONS > cleanall-vc14.cmd
 echo for %%%%i in (release debug) do ( >> cleanall-vc14.cmd
 echo    for %%%%j in (vc14) do ( >> cleanall-vc14.cmd
-echo      for %%%%k in (x86 x64) do ( >> cleanall-vc14.cmd
+echo      for %%%%k in (x86) do ( >> cleanall-vc14.cmd
+REM echo      for %%%%k in (x86 x64) do ( >> cleanall-vc14.cmd
 echo 		pushd vs%%%%i-%%%%j-%%%%k >> cleanall-vc14.cmd
 echo        call resetenv.cmd >> cleanall-vc14.cmd
 echo 		cmake --build . --target uninstall --config %%%%i >> cleanall-vc14.cmd
@@ -136,7 +146,8 @@ echo @echo off > cleanrelease-vc14.cmd
 echo SETLOCAL ENABLEEXTENSIONS > cleanrelease-vc14.cmd
 echo for %%%%i in (release) do ( >> cleanrelease-vc14.cmd
 echo    for %%%%j in (vc14) do ( >> cleanrelease-vc14.cmd
-echo      for %%%%k in (x86 x64) do ( >> cleanrelease-vc14.cmd
+echo      for %%%%k in (x86) do ( >> cleanrelease-vc14.cmd
+REM echo      for %%%%k in (x86 x64) do ( >> cleanrelease-vc14.cmd
 echo 		pushd vs%%%%i-%%%%j-%%%%k >> cleanrelease-vc14.cmd
 echo        call resetenv.cmd >> cleanrelease-vc14.cmd
 echo 		cmake --build . --target uninstall --config %%%%i >> cleanrelease-vc14.cmd

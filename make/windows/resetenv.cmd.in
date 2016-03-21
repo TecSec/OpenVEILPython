@@ -28,6 +28,7 @@ rem	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 rem	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 rem	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 rem
+
 set basepath=
 set framework35version=
 set FrameworkDir=
@@ -50,7 +51,8 @@ set Framework40Version=
 set VisualStudioVersion=
 set WindowsSDK_ExecutablePath_x64=
 set WindowsSDK_ExecutablePath_x86=
-set path=C:\Program Files\Git\cmd;c:\utils;c:\windows;c:\windows\system32;C:\ProgramData\Oracle\Java\Javapath;c:\utils;C:\Program Files\SourceGear\Common\DiffMerge\;C:\Program Files (x86)\CMake\bin;C:\Users\rogerb\AppData\Local\Programs\Python\Python35\Scripts\;C:\Users\rogerb\AppData\Local\Programs\Python\Python35\;C:\Users\rogerb\AppData\Roaming\npm
+set path=C:\Program Files\Git\cmd;c:\utils;c:\windows;c:\windows\system32;C:\ProgramData\Oracle\Java\Javapath;c:\utils;C:\Program Files\SourceGear\Common\DiffMerge\;C:\Program Files (x86)\CMake\bin;%PYTHON_PATH%;%APPDATA%\npm
+
 set VS100COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\Tools\
 set VS110COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\Tools\
 set VS120COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Tools\
