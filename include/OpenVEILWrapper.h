@@ -29,9 +29,9 @@
 //
 
 #pragma once
-#include "OpenVEIL.h"
-#include "CmsHeader.h"
-#include "FileVEILSupport.h"
+#include "VEIL.h"
+#include "VEILCmsHeader.h"
+#include "VEILFileSupport.h"
 #include <boost/python.hpp>
 #include <deque>
 #include <vector>
