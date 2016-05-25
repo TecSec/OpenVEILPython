@@ -61,9 +61,6 @@ bool Environment::TerminateVEIL()
 }
 
 
-// Expose methods to BOOST Python
-using namespace boost::python;
-
 ConnectionStatus identity_(ConnectionStatus x) { return x; }
 
 //PyObject* boost::python::type_into_python<byte_array>::convert(byte_array const&ba)
@@ -86,24 +83,23 @@ ConnectionStatus identity_(ConnectionStatus x) { return x; }
 //	data->convertible = storage;
 //}
 
-BOOST_PYTHON_MODULE(OpenVEIL)
+PYBIND11_PLUGIN(OpenVEIL)
 {
-	object package = scope();
-	package.attr("__path__") = "OpenVEIL";
+	py::module m("OpenVEIL", "OpenVEIL Language Bindings");
 
+	
 	//to_python_converter< byte_array, boost::python::type_into_python<byte_array> >();
 	//type_from_python< byte_array >();
-
-	object class_Env = class_<Environment>("Environment")
+	py::class_<Environment>(m, "Environment")
 		.def("DispatchEvents", &Environment::DispatchEvents)
 		.def("InitializeVEIL", &Environment::InitializeVEIL)
 		.def("TerminateVEIL", &Environment::TerminateVEIL)
 	;
-	object Env = class_Env();
+	//object Env = class_Env();
 
-	scope().attr("Environment") = Env;
+	m.attr("Environment") = py::cast(new Environment());
 
-	enum_<ConnectionStatus>("ConnectionStatus")
+	py::enum_<ConnectionStatus>(m, "ConnectionStatus")
 		.value("Connected", connStatus_Connected)
 		.value("NoServer", connStatus_NoServer)
 		.value("BadAuth", connStatus_BadAuth)
@@ -111,35 +107,31 @@ BOOST_PYTHON_MODULE(OpenVEIL)
 		.value("UrlBad", connStatus_UrlBad)
 		;
 
-	enum_<LoginStatus>("LoginStatus")
+	py::enum_<LoginStatus>(m, "LoginStatus")
 		.value("Connected", loginStatus_Connected)
 		.value("NoServer", loginStatus_NoServer)
 		.value("BadAuth", loginStatus_BadAuth)
 		;
 
 	{
-		// map the Util namespace to a sub-module
-		// make "from mypackage.Util import <whatever>" work
-		object KeyVEILConnectorModule(handle<>(borrowed(PyImport_AddModule("OpenVEIL.KeyVEILConnector"))));
-		// make "from mypackage import Util" work
-		scope().attr("KeyVEILConnector") = KeyVEILConnectorModule;
-		// set the current scope to the new sub-module
-		scope util_scope = KeyVEILConnectorModule;
+		py::module kv = m.def_submodule("KeyVEIL", "KeyVEIL module");
+		
+		m.attr("KeyVEILConnector") = kv;
 
-		class_<KeyVEILConnectorWrapper>("KeyVEILConnector")
+		py::class_<KeyVEILConnectorWrapper>(kv, "KeyVEILConnector")
 			.def("release", &KeyVEILConnectorWrapper::release)
 			.def("connectToServer", &KeyVEILConnectorWrapper::connectToServer)
 			.def("disconnect", &KeyVEILConnectorWrapper::disconnect)
-			.def_readonly("isConnected", &KeyVEILConnectorWrapper::isConnected)
+			.def_property_readonly("isConnected", &KeyVEILConnectorWrapper::isConnected)
 			.def("sendJsonRequest", &KeyVEILConnectorWrapper::sendJsonRequest)
 			.def("sendBase64Request", &KeyVEILConnectorWrapper::sendBase64Request)
 			.def("refresh", &KeyVEILConnectorWrapper::refresh)
-			.def_readonly("tokenCount", &KeyVEILConnectorWrapper::tokenCount)
+			.def_property_readonly("tokenCount", &KeyVEILConnectorWrapper::tokenCount)
 			.def("tokenByIndex", &KeyVEILConnectorWrapper::tokenByIndex)
 			.def("tokenByName", &KeyVEILConnectorWrapper::tokenByName)
 			.def("tokenBySerialNumber", &KeyVEILConnectorWrapper::tokenBySerialNumber)
 			.def("tokenById", &KeyVEILConnectorWrapper::tokenById)
-			.def_readonly("favoriteCount", &KeyVEILConnectorWrapper::favoriteCount)
+			.def_property_readonly("favoriteCount", &KeyVEILConnectorWrapper::favoriteCount)
 			.def("favoriteByIndex", &KeyVEILConnectorWrapper::favoriteByIndex)
 			.def("favoriteByName", &KeyVEILConnectorWrapper::favoriteByName)
 			.def("favoriteById", &KeyVEILConnectorWrapper::favoriteById)
@@ -151,31 +143,31 @@ BOOST_PYTHON_MODULE(OpenVEIL)
 			.def("favoriteForEnterprise", &KeyVEILConnectorWrapper::favoriteForEnterprise)
 			;
 
-		class_<TokenWrapper>("Token")
+		py::class_<TokenWrapper>(kv, "Token")
 			.def("release", &TokenWrapper::release)
-			.add_property("tokenName", &TokenWrapper::getTokenName, &TokenWrapper::setTokenName)
-			.def_readonly("serialNumber", &TokenWrapper::serialNumber)
-			.def_readonly("id", &TokenWrapper::id)
-			.def_readonly("enterpriseName", &TokenWrapper::enterpriseName)
-			.def_readonly("memberName", &TokenWrapper::memberName)
-			.def_readonly("tokenType", &TokenWrapper::tokenType)
-			.def_readonly("enterpriseId", &TokenWrapper::enterpriseId)
-			.def_readonly("memberId", &TokenWrapper::memberId)
+			.def_property_readonly("tokenName", &TokenWrapper::getTokenName, &TokenWrapper::setTokenName)
+			.def_property_readonly("serialNumber", &TokenWrapper::serialNumber)
+			.def_property_readonly("id", &TokenWrapper::id)
+			.def_property_readonly("enterpriseName", &TokenWrapper::enterpriseName)
+			.def_property_readonly("memberName", &TokenWrapper::memberName)
+			.def_property_readonly("tokenType", &TokenWrapper::tokenType)
+			.def_property_readonly("enterpriseId", &TokenWrapper::enterpriseId)
+			.def_property_readonly("memberId", &TokenWrapper::memberId)
 			.def("openSession", &TokenWrapper::openSession)
 			;
 
-		class_<SessionWrapper>("Session")
+		py::class_<SessionWrapper>(kv, "Session")
 			.def("release", &SessionWrapper::release)
 			.def("close", &SessionWrapper::close)
 			.def("login", &SessionWrapper::Login)
-			.def_readonly("isLoggedIn", &SessionWrapper::IsLoggedIn)
+			.def_property_readonly("isLoggedIn", &SessionWrapper::IsLoggedIn)
 			.def("logout", &SessionWrapper::Logout)
 			//.def("GenerateWorkingKey", &SessionWrapper::GenerateWorkingKey)
 			//.def("RegenerateWorkingKey", &SessionWrapper::RegenerateWorkingKey)
 			.def("getProfile", &SessionWrapper::getProfile)
-			.def_readonly("isLocked", &SessionWrapper::IsLocked)
-			.def_readonly("retriesLeft", &SessionWrapper::retriesLeft)
-			.def_readonly("isValid", &SessionWrapper::IsValid)
+			.def_property_readonly("isLocked", &SessionWrapper::IsLocked)
+			.def_property_readonly("retriesLeft", &SessionWrapper::retriesLeft)
+			.def_property_readonly("isValid", &SessionWrapper::IsValid)
 			.def("duplicate", &SessionWrapper::Duplicate)
 			.def("encryptFileUsingFavorite", &SessionWrapper::encryptFileUsingFavorite)
 			.def("decryptFile", &SessionWrapper::decryptFile)
@@ -183,13 +175,13 @@ BOOST_PYTHON_MODULE(OpenVEIL)
 			.def("decryptData", &SessionWrapper::decryptData)
 			;
 
-		class_<FavoriteWrapper>("Favorite")
+		py::class_<FavoriteWrapper>(kv, "Favorite")
 			.def("release", &FavoriteWrapper::release)
-			.def_readonly("favoriteId", &FavoriteWrapper::getFavoriteId)
-			.def_readonly("enterpriseId", &FavoriteWrapper::getEnterpriseId)
-			.add_property("favoriteName", &FavoriteWrapper::getFavoriteName, &FavoriteWrapper::setFavoriteName)
-			.add_property("tokenSerialNumber", &FavoriteWrapper::getTokenSerialNumber, &FavoriteWrapper::setTokenSerialNumber)
-			.add_property("headerData", &FavoriteWrapper::getHeaderData, &FavoriteWrapper::setHeaderData)
+			.def_property_readonly("favoriteId", &FavoriteWrapper::getFavoriteId)
+			.def_property_readonly("enterpriseId", &FavoriteWrapper::getEnterpriseId)
+			.def_property("favoriteName", &FavoriteWrapper::getFavoriteName, &FavoriteWrapper::setFavoriteName)
+			.def_property("tokenSerialNumber", &FavoriteWrapper::getTokenSerialNumber, &FavoriteWrapper::setTokenSerialNumber)
+			.def_property("headerData", &FavoriteWrapper::getHeaderData, &FavoriteWrapper::setHeaderData)
 			.def("encryptFile", &FavoriteWrapper::encryptFile)
 			.def("encryptData", &FavoriteWrapper::encryptData)
 			;
@@ -197,28 +189,22 @@ BOOST_PYTHON_MODULE(OpenVEIL)
 
 
 	{
-		// map the Util namespace to a sub-module
-		// make "from mypackage.Util import <whatever>" work
-		object GenericConnectorWrapperModule(handle<>(borrowed(PyImport_AddModule("OpenVEIL.GenericConnector"))));
-		// make "from mypackage import Util" work
-		scope().attr("GenericConnector") = GenericConnectorWrapperModule;
-		// set the current scope to the new sub-module
-		scope util_scope = GenericConnectorWrapperModule;
+		py::module util = m.def_submodule("GenericConnector", "Generic server connector");
 
-
-		class_<GenericConnectorWrapper>("GenericConnector")
+		py::class_<GenericConnectorWrapper>(util, "GenericConnector")
 			.def("release", &GenericConnectorWrapper::release)
 			.def("connectToServer", &GenericConnectorWrapper::connectToServer)
 			.def("disconnect", &GenericConnectorWrapper::disconnect)
-			.def_readonly("isConnected", &GenericConnectorWrapper::isConnected)
+			.def("isConnected", &GenericConnectorWrapper::isConnected)
 			.def("sendJsonRequest", &GenericConnectorWrapper::sendJsonRequest)
 			.def("sendBase64Request", &GenericConnectorWrapper::sendBase64Request)
 			;
 	}
+	return m.ptr();
 }
 
 
-tsData tsDataFromPyObject(const boost::python::object& obj)
+tsData tsDataFromPyObject(const py::object& obj)
 {
 	tsData tmp;
 	char *data;
@@ -255,8 +241,8 @@ tsData tsDataFromPyObject(const boost::python::object& obj)
 	return tmp;
 }
 
-boost::python::object tsDataToPyObject(const tsData& data)
+py::object tsDataToPyObject(const tsData& data)
 {
-	boost::python::object o(boost::python::handle<>(PyByteArray_FromStringAndSize((const char *)data.c_str(), data.size())));
+	py::object o(py::handle<>(PyByteArray_FromStringAndSize((const char *)data.c_str(), data.size())));
 	return o;
 }

@@ -32,12 +32,13 @@
 #include "VEIL.h"
 #include "VEILCmsHeader.h"
 #include "VEILFileSupport.h"
-#include <boost/python.hpp>
+#include <pybind11/pybind11.h>
 #include <deque>
 #include <vector>
 
 typedef uint8_t byte;
-typedef boost::python::object byte_array;
+namespace py = pybind11;
+typedef py::object byte_array;
 
 class Environment
 {
@@ -65,8 +66,8 @@ public:
 	virtual void release();
 	virtual void disconnect();
 	virtual bool isConnected();
-	virtual boost::python::tuple sendJsonRequest(const std::string& verb, const std::string& cmd, const std::string& inData);
-	virtual boost::python::tuple sendBase64Request(const std::string& verb, const std::string& cmd, const boost::python::object& inData);
+	virtual py::tuple sendJsonRequest(const std::string& verb, const std::string& cmd, const std::string& inData);
+	virtual py::tuple sendBase64Request(const std::string& verb, const std::string& cmd, const py::object& inData);
 protected:
 	std::shared_ptr<IKeyVEILConnector> conn;
 	bool isReady();
@@ -95,15 +96,15 @@ public:
 	bool Logout();
 	//bool GenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, std::function<bool(Asn1::CTS::CkmCombineParameters&, tsData&)> headerCallback, tsData &WorkingKey);
 	//bool RegenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, tsData &WorkingKey);
-	boost::python::dict getProfile();
+	py::dict getProfile();
 	bool IsLocked();
 	size_t retriesLeft();
 	bool IsValid();
 	SessionWrapper Duplicate();
 	bool encryptFileUsingFavorite(FavoriteWrapper fav, const std::string& sourceFile, bool compress, const std::string& encryptedFile);
 	bool decryptFile(const std::string& encryptedFile, const std::string& decryptedFile);
-	byte_array encryptDataUsingFavorite(FavoriteWrapper fav, const boost::python::object& sourceData, bool compress);
-	byte_array decryptData(const boost::python::object& encryptedData);
+	byte_array encryptDataUsingFavorite(FavoriteWrapper fav, const py::object& sourceData, bool compress);
+	byte_array decryptData(const py::object& encryptedData);
 
 	std::shared_ptr<IKeyVEILSession> handle() { return _session; }
 
@@ -140,10 +141,10 @@ public:
 	void setTokenSerialNumber(const std::string& setTo);
 
 	byte_array getHeaderData();
-	void setHeaderData(const boost::python::object& setTo);
+	void setHeaderData(const py::object& setTo);
 
 	bool encryptFile(SessionWrapper session, const std::string& sourceFile, bool compress, const std::string& encryptedFile);
-	byte_array encryptData(SessionWrapper session, const boost::python::object& sourceData, bool compress);
+	byte_array encryptData(SessionWrapper session, const py::object& sourceData, bool compress);
 
 protected:
 	std::shared_ptr<IFavorite> _favorite;
@@ -193,7 +194,7 @@ public:
 	size_t tokenCount();
 	TokenWrapper tokenByIndex(size_t index);
 	TokenWrapper tokenByName(const std::string& tokenName);
-	TokenWrapper tokenBySerialNumber(const boost::python::object& serialNumber);
+	TokenWrapper tokenBySerialNumber(const py::object& serialNumber);
 	TokenWrapper tokenById(const std::string& id);
 
 	size_t favoriteCount();
@@ -244,5 +245,5 @@ private:
 	virtual ~StatusClass() {}
 };
 
-extern tsData tsDataFromPyObject(const boost::python::object& obj);
-extern boost::python::object tsDataToPyObject(const tsData& data);
+extern tsData tsDataFromPyObject(const py::object& obj);
+extern py::object tsDataToPyObject(const tsData& data);

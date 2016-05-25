@@ -37,7 +37,6 @@ if (CMAKE_CONFIGURATION_TYPES)
   set (CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING "Reset the configurations for ${VEILCORENAME}" )
 endif()
 
-set(VEIL_COPYRIGHT "Copyright (C) 2015 TecSec, Inc.  All Rights Reserved Worldwide.")
 
 # # IF(WIN32)
 # # set(BOOST_ROOT c:/boost;${CMAKE_CURRENT_SOURCE_DIR}/../boost_1_59_0;${CMAKE_CURRENT_SOURCE_DIR}/../boost;C:/Program Files/boost_1_59_0)
@@ -45,17 +44,17 @@ set(VEIL_COPYRIGHT "Copyright (C) 2015 TecSec, Inc.  All Rights Reserved Worldwi
 # # set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../boost_1_59_0;${CMAKE_CURRENT_SOURCE_DIR}/../boost;C:/Program Files/boost_1_59_0)
 # # ENDIF(WIN32)
 
-set(Boost_DEBUG OFF)
-set(Boost_ADDITIONAL_VERSIONS 1.60 1.59)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_LIBS       OFF)
-set(Boost_USE_STATIC_RUNTIME    OFF)
+# set(Boost_DEBUG OFF)
+# set(Boost_ADDITIONAL_VERSIONS 1.60 1.59)
+# set(Boost_USE_MULTITHREADED ON)
+# set(Boost_USE_STATIC_LIBS       OFF)
+# set(Boost_USE_STATIC_RUNTIME    OFF)
 
-FIND_PACKAGE(Boost 1.59 COMPONENTS python3 REQUIRED)
-message(STATUS Boost_INCLUDE_DIRS = ${Boost_INCLUDE_DIRS})
-message(STATUS Boost_LIBRARY_DIRS = ${Boost_LIBRARY_DIRS})
-message(STATUS Boost_PYTHON3_LIBRARY = ${Boost_PYTHON3_LIBRARY})
-message(STATUS Boost_LIBRARIES = ${Boost_LIBRARIES})
+# FIND_PACKAGE(Boost 1.59 COMPONENTS python3 REQUIRED)
+# message(STATUS Boost_INCLUDE_DIRS = ${Boost_INCLUDE_DIRS})
+# message(STATUS Boost_LIBRARY_DIRS = ${Boost_LIBRARY_DIRS})
+# message(STATUS Boost_PYTHON3_LIBRARY = ${Boost_PYTHON3_LIBRARY})
+# message(STATUS Boost_LIBRARIES = ${Boost_LIBRARIES})
 
 set(Python_ADDITIONAL_VERSIONS 3.5.1 3.5 3.4)
 FIND_PACKAGE(PythonInterp)
@@ -84,6 +83,7 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
   link_directories(${Boost_LIBRARY_DIRS})
 endif()
+include_directories(ThirdParty/pybind11/include)
 
 add_uninstall()
 
