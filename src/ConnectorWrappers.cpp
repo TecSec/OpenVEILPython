@@ -89,11 +89,11 @@ bool Connector::isConnected()
 	}
 }
 
-boost::python::tuple Connector::sendJsonRequest(const std::string& verb, const std::string& cmd, const std::string& inData)
+py::tuple Connector::sendJsonRequest(const std::string& verb, const std::string& cmd, const std::string& inData)
 {
 	if (!isReady())
 	{
-		return boost::python::make_tuple(false, "Connection object is not ready.", 1000);
+		return py::make_tuple(false, "Connection object is not ready.", 1000);
 	}
 
 	JSONObject inDataTmp;
@@ -102,22 +102,22 @@ boost::python::tuple Connector::sendJsonRequest(const std::string& verb, const s
 
 	if (inDataTmp.FromJSON(inData.c_str()) <= 0)
 	{
-		return boost::python::make_tuple(false, "", 0);
+		return py::make_tuple(false, "", 0);
 	}
 
 	if (!conn->sendJsonRequest(verb.c_str(), cmd.c_str(), inDataTmp, outDataTmp, status))
 	{
-		return boost::python::make_tuple(false, outDataTmp.ToJSON().c_str(), status);
+		return py::make_tuple(false, outDataTmp.ToJSON().c_str(), status);
 	}
 
-	return boost::python::make_tuple(true, outDataTmp.ToJSON().c_str(), status);
+	return py::make_tuple(true, outDataTmp.ToJSON().c_str(), status);
 }
 
-boost::python::tuple Connector::sendBase64Request(const std::string& verb, const std::string& cmd, const byte_array& inData)
+py::tuple Connector::sendBase64Request(const std::string& verb, const std::string& cmd, const byte_array& inData)
 {
 	if (!isReady())
 	{
-		return boost::python::make_tuple(false, "Connection object is not ready.", 1000);
+		return py::make_tuple(false, "Connection object is not ready.", 1000);
 	}
 
 	tsData inDataTmp(tsDataFromPyObject(inData));
@@ -126,10 +126,10 @@ boost::python::tuple Connector::sendBase64Request(const std::string& verb, const
 
 	if (!conn->sendRequest(verb.c_str(), cmd.c_str(), inDataTmp, outDataTmp, status))
 	{
-		return boost::python::make_tuple(false, outDataTmp.ToBase64().c_str(), status);
+		return py::make_tuple(false, outDataTmp.ToBase64().c_str(), status);
 	}
 
-	return boost::python::make_tuple(true, outDataTmp.ToBase64().c_str(), status);
+	return py::make_tuple(true, outDataTmp.ToBase64().c_str(), status);
 }
 #pragma endregion
 

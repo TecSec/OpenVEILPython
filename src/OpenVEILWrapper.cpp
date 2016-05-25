@@ -63,18 +63,18 @@ bool Environment::TerminateVEIL()
 
 ConnectionStatus identity_(ConnectionStatus x) { return x; }
 
-//PyObject* boost::python::type_into_python<byte_array>::convert(byte_array const&ba)
+//PyObject* py::type_into_python<byte_array>::convert(byte_array const&ba)
 //{
 //	const char* src = ba.empty() ? "" : reinterpret_cast<const char*>(&ba.front;());
 //	return PyBytes_FromStringAndSize(src, ba.size());
 //}
 //
-//void* boost::python::type_from_python<byte_array>::convertible(PyObject* obj)
+//void* py::type_from_python<byte_array>::convertible(PyObject* obj)
 //{
 //	return PyBytes_Check(obj) ? obj : nullptr;
 //}
 //
-//void boost::python::type_from_python<byte_array>::construct(PyObject* obj, converter::rvalue_from_python_stage1_data* data)
+//void py::type_from_python<byte_array>::construct(PyObject* obj, converter::rvalue_from_python_stage1_data* data)
 //{
 //	auto storage = reinterpret_cast< converter::rvalue_from_python_storage<byte_array>* >(data)->storage.bytes;
 //	byte* dest; Py_ssize_t len;
@@ -88,7 +88,7 @@ PYBIND11_PLUGIN(OpenVEIL)
 	py::module m("OpenVEIL", "OpenVEIL Language Bindings");
 
 	
-	//to_python_converter< byte_array, boost::python::type_into_python<byte_array> >();
+	//to_python_converter< byte_array, py::type_into_python<byte_array> >();
 	//type_from_python< byte_array >();
 	py::class_<Environment>(m, "Environment")
 		.def("DispatchEvents", &Environment::DispatchEvents)

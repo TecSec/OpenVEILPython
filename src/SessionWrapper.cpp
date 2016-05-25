@@ -81,27 +81,27 @@ bool SessionWrapper::Logout()
 //{
 //}
 
-static void JSONToDictionary(const JSONObject& obj, boost::python::dict& d);
-static void JSONArrayToList(const JSONFieldList& ary, boost::python::list& r)
+static void JSONToDictionary(const JSONObject& obj, py::dict& d);
+static void JSONArrayToList(const JSONFieldList& ary, py::list& r)
 {
 	std::for_each(ary->begin(), ary->end(), [&r](const JSONField& fld) {
 		switch (fld.Type())
 		{
 		case JSONField::jsonNull:
-			r.append(nullptr);
+			r.append(py::cast(nullptr));
 			break;
 		case JSONField::jsonString:
-			r.append(fld.AsString().c_str());
+			r.append(py::cast(fld.AsString().c_str()));
 			break;
 		case JSONField::jsonBool:
-			r.append(fld.AsBool());
+			r.append(py::cast(fld.AsBool()));
 			break;
 		case JSONField::jsonNumber:
-			r.append(fld.AsNumber());
+			r.append(py::cast(fld.AsNumber()));
 			break;
 		case JSONField::jsonObject:
 		{
-			boost::python::dict d1;
+			py::dict d1;
 
 			JSONToDictionary(fld.AsObject(), d1);
 			r.append(d1);
@@ -109,7 +109,7 @@ static void JSONArrayToList(const JSONFieldList& ary, boost::python::list& r)
 		break;
 		case JSONField::jsonArray:
 		{
-			boost::python::list r1;
+			py::list r1;
 			JSONArrayToList(fld.AsArray(), r1);
 			r.append(r1);
 		}
@@ -118,7 +118,7 @@ static void JSONArrayToList(const JSONFieldList& ary, boost::python::list& r)
 
 	});
 }
-static void JSONToDictionary(const JSONObject& obj, boost::python::dict& d)
+static void JSONToDictionary(const JSONObject& obj, py::dict& d)
 {
 	std::for_each(obj.Fields()->begin(), obj.Fields()->end(), [&d](const JSONField& fld) {
 		switch (fld.Type())
@@ -127,17 +127,17 @@ static void JSONToDictionary(const JSONObject& obj, boost::python::dict& d)
 			d[fld.Name().c_str()] = nullptr;
 			break;
 		case JSONField::jsonString:
-			d[fld.Name().c_str()] = fld.AsString().c_str();
+			d[fld.Name().c_str()] = py::cast(fld.AsString().c_str());
 			break;
 		case JSONField::jsonBool:
-			d[fld.Name().c_str()] = fld.AsBool();
+			d[fld.Name().c_str()] = py::cast(fld.AsBool());
 			break;
 		case JSONField::jsonNumber:
-			d[fld.Name().c_str()] = fld.AsNumber();
+			d[fld.Name().c_str()] = py::cast(fld.AsNumber());
 			break;
 		case JSONField::jsonObject:
 		{
-			boost::python::dict d1;
+			py::dict d1;
 
 			JSONToDictionary(fld.AsObject(), d1);
 			d[fld.Name().c_str()] = d1;
@@ -145,7 +145,7 @@ static void JSONToDictionary(const JSONObject& obj, boost::python::dict& d)
 			break;
 		case JSONField::jsonArray:
 		{
-			boost::python::list r;
+			py::list r;
 			JSONArrayToList(fld.AsArray(), r);
 			d[fld.Name().c_str()] = r;
 		}
@@ -153,9 +153,9 @@ static void JSONToDictionary(const JSONObject& obj, boost::python::dict& d)
 		}
 	});
 }
-boost::python::dict SessionWrapper::getProfile()
+py::dict SessionWrapper::getProfile()
 {
-	boost::python::dict d;
+	py::dict d;
 
 	if (!isReady())
 		return d;
@@ -207,7 +207,7 @@ bool SessionWrapper::decryptFile(const std::string& encryptedFile, const std::st
 	if (xp_GetFileAttributes(inputFile) == XP_INVALID_FILE_ATTRIBUTES || xp_IsDirectory(inputFile))
 	{
 		PyErr_SetString(PyExc_RuntimeError, (tsAscii() << "File -> " << inputFile << " <- does not exist Decrypt operation aborted").c_str());
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return false;
 	}
 
@@ -218,14 +218,14 @@ bool SessionWrapper::decryptFile(const std::string& encryptedFile, const std::st
 		!(fileOps->SetSession(_session)))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "An error occurred while building the file decryptor.  The OpenVEIL installation may be damaged.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return false;
 	}
 
 	if (!fileOps->DecryptFileAndStreams(inputFile, outputFile))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "Decrypt failed.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return false;
 	}
 
@@ -251,14 +251,14 @@ byte_array SessionWrapper::decryptData(const byte_array& encryptedData)
 		!(fileOps->SetSession(_session)))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "An error occurred while building the file decryptor.  The OpenVEIL may be damaged.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return byte_array();
 	}
 
 	if (!fileOps->DecryptCryptoData(inData, destData))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "Decryption failed.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return byte_array();
 	}
 

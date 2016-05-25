@@ -126,7 +126,7 @@ bool FavoriteWrapper::encryptFile(SessionWrapper session, const std::string& sou
 	if (xp_GetFileAttributes(inputFile) == XP_INVALID_FILE_ATTRIBUTES || xp_IsDirectory(inputFile))
 	{
 		PyErr_SetString(PyExc_RuntimeError, (tsAscii() << "File -> " << inputFile.c_str() << " <- does not exist Encrypt operation aborted").c_str());
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return false;
 	}
 
@@ -137,7 +137,7 @@ bool FavoriteWrapper::encryptFile(SessionWrapper session, const std::string& sou
 		!(fileOps->SetSession(session.handle())))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "An error occurred while building the file encryptor.  The CKM Runtime may be damaged.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return false;
 	}
 
@@ -150,7 +150,7 @@ bool FavoriteWrapper::encryptFile(SessionWrapper session, const std::string& sou
 	if (!(header = ::ServiceLocator()->get_instance<ICmsHeader>("/CmsHeader")) || !header->FromBytes(_favorite->headerData()))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "An error occurred while building the encryption header.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return false;
 	}
 
@@ -175,7 +175,7 @@ bool FavoriteWrapper::encryptFile(SessionWrapper session, const std::string& sou
 		false, header->GetPaddingType(), 5000000)))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "Encrypt failed.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return false;
 	}
 	return true;
@@ -204,7 +204,7 @@ byte_array FavoriteWrapper::encryptData(SessionWrapper session, const byte_array
 	if (!session.handle())
 	{
 		PyErr_SetString(PyExc_RuntimeError, "Session not valid.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return byte_array();
 	}
 
@@ -215,20 +215,20 @@ byte_array FavoriteWrapper::encryptData(SessionWrapper session, const byte_array
 		!(fileOps->SetSession(session.handle())))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "An error occurred while building the file encryptor.  The CKM Runtime may be damaged.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return byte_array();
 	}
 	if (!(header = ::ServiceLocator()->get_instance<ICmsHeader>("/CmsHeader")) || !header->FromBytes(_favorite->headerData()))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "An error occurred while building the encryption header.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return byte_array();
 	}
 
 	if (!header)
 	{
 		PyErr_SetString(PyExc_RuntimeError, "The favorite is invalid or incomplete.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return byte_array();
 	}
 
@@ -253,7 +253,7 @@ byte_array FavoriteWrapper::encryptData(SessionWrapper session, const byte_array
 		false, header->GetPaddingType(), 5000000)))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "Encrypt failed.");
-		boost::python::throw_error_already_set();
+		throw py::error_already_set();
 		return byte_array();
 	}
 	return tsDataToPyObject(encData);
