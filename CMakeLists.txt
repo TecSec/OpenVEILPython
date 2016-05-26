@@ -97,7 +97,7 @@ CopyImportTargetBinaries(VEILCmsHeader ${BIN_DIR})
 list(GET Boost_LIBRARIES 1 _tmp)
 get_filename_component(__boostPath ${_tmp} DIRECTORY)
 get_filename_component(__boostFile ${_tmp} NAME_WE)
-install(FILES ${__boostPath}/${__boostFile}${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_CURRENT_SOURCE_DIR}/Samples/tokenList.py ${CMAKE_CURRENT_SOURCE_DIR}/Samples/dumpmodule.py DESTINATION ${BIN_DIR})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Samples/tokenList.py ${CMAKE_CURRENT_SOURCE_DIR}/Samples/dumpmodule.py DESTINATION ${BIN_DIR})
 
 # DumpAllVariables()
 # get_filename_component(__pythonPath ${PYTHON_EXECUTABLE} DIRECTORY)

@@ -22,7 +22,7 @@ add_library(OpenVEIL SHARED
 
 target_include_directories(OpenVEIL INTERFACE $<BUILD_INTERFACE:${PUBLIC_SOURCE_TOP_DIR}/include> $<INSTALL_INTERFACE:${TS_MODULE}/include>)
 add_definitions("-DOPENVEILWRAPPER_EXPORTS")
-TARGET_LINK_LIBRARIES(OpenVEIL ${Boost_LIBRARIES} VEILCore VEILFileSupport VEILCmsHeader ${PYTHON_LIBRARY})
+TARGET_LINK_LIBRARIES(OpenVEIL VEILCore VEILFileSupport VEILCmsHeader ${PYTHON_LIBRARY})
 set_target_properties(OpenVEIL PROPERTIES SUFFIX ".pyd")
 # add_precompiled_header(OVCore stdafx.h FORCEINCLUDE SOURCE_CXX stdafx.cpp)
 
