@@ -145,7 +145,7 @@ PYBIND11_PLUGIN(OpenVEIL)
 
 		py::class_<TokenWrapper>(kv, "Token")
 			.def("release", &TokenWrapper::release)
-			.def_property_readonly("tokenName", &TokenWrapper::getTokenName, &TokenWrapper::setTokenName)
+			.def_property("tokenName", &TokenWrapper::getTokenName, &TokenWrapper::setTokenName)
 			.def_property_readonly("serialNumber", &TokenWrapper::serialNumber)
 			.def_property_readonly("id", &TokenWrapper::id)
 			.def_property_readonly("enterpriseName", &TokenWrapper::enterpriseName)
@@ -243,6 +243,6 @@ tsData tsDataFromPyObject(const py::object& obj)
 
 py::object tsDataToPyObject(const tsData& data)
 {
-	py::object o(py::handle<>(PyByteArray_FromStringAndSize((const char *)data.c_str(), data.size())));
+	py::object o(PyByteArray_FromStringAndSize((const char *)data.c_str(), data.size()), false);
 	return o;
 }

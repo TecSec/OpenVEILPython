@@ -32,6 +32,8 @@
 #include "VEIL.h"
 #include "VEILCmsHeader.h"
 #include "VEILFileSupport.h"
+#undef min
+#undef max
 #include <pybind11/pybind11.h>
 #include <deque>
 #include <vector>
