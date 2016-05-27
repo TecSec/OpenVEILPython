@@ -199,7 +199,7 @@ PYBIND11_PLUGIN(OpenVEIL)
 			.def("release", &GenericConnectorWrapper::release)
 			.def("connectToServer", &GenericConnectorWrapper::connectToServer)
 			.def("disconnect", &GenericConnectorWrapper::disconnect)
-			.def("isConnected", &GenericConnectorWrapper::isConnected)
+			.def_property_readonly("isConnected", &GenericConnectorWrapper::isConnected)
 			.def("sendJsonRequest", &GenericConnectorWrapper::sendJsonRequest)
 			.def("sendBase64Request", &GenericConnectorWrapper::sendBase64Request)
 			;
