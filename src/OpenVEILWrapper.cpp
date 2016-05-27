@@ -87,6 +87,9 @@ PYBIND11_PLUGIN(OpenVEIL)
 {
 	py::module m("OpenVEIL", "OpenVEIL Language Bindings");
 
+	py::class_<Connector>(m, "Connector")
+		.def("sendJsonRequest", &GenericConnectorWrapper::sendJsonRequest)
+		;
 	
 	//to_python_converter< byte_array, py::type_into_python<byte_array> >();
 	//type_from_python< byte_array >();
@@ -191,7 +194,8 @@ PYBIND11_PLUGIN(OpenVEIL)
 	{
 		py::module util = m.def_submodule("GenericConnector", "Generic server connector");
 
-		py::class_<GenericConnectorWrapper>(util, "GenericConnector")
+		py::class_<GenericConnectorWrapper>(util, "GenericConnector", py::base<Connector>())
+            .def(py::init<>())
 			.def("release", &GenericConnectorWrapper::release)
 			.def("connectToServer", &GenericConnectorWrapper::connectToServer)
 			.def("disconnect", &GenericConnectorWrapper::disconnect)
