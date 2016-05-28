@@ -102,10 +102,6 @@ if (GTEST_FOUND)
 set(_output_results "${_output_results}
 GTEST_FOUND")
 endif(GTEST_FOUND)
-if (Boost_FOUND)
-set(_output_results "${_output_results}
-Boost_FOUND")
-endif(Boost_FOUND)
 if (BZ2_FOUND)
 set(_output_results "${_output_results}
 BZ2_FOUND")
