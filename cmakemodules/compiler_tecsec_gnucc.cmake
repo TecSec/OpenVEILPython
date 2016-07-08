@@ -1,4 +1,4 @@
-#	Copyright (c) 2015, TecSec, Inc.
+#	Copyright (c) 2016, TecSec, Inc.
 #
 #	Redistribution and use in source and binary forms, with or without
 #	modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
 #	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 #	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Written by Roger Butler
 
 
 # TODO should we add -Wconversion to make this more like the MSFT compiler?
@@ -47,12 +48,13 @@ execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
 if(TS_X_PLATFORM STREQUAL "x64")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 -mssse3 -maes")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -mssse3 -maes")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 -msse4.1 -maes")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -msse4.1 -maes")
     set(LINK_FLAGS "${LINK_FLAGS} -m64")
+elseif(ANDROID)
 elseif(TS_X_PLATFORM STREQUAL "x86")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 -msse -msse3 -maes -march=i686")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 -msse -msse3 -maes -march=i686")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 -msse -msse4.1 -maes -march=i686")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 -msse -msse4.1 -maes -march=i686")
     set(LINK_FLAGS "${LINK_FLAGS} -m32")
 else()
   error(Missing processor type)
@@ -103,7 +105,11 @@ OPTION(SG_GPROF "Compile everything with -pg for gprof" OFF)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${TS_CONFIG}}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${TS_CONFIG}}")
-if(NOT MINGW)
-	LINK_LIBRARIES(pthread dl)
-endif(NOT MINGW)
+if(ANDROID)
+	LINK_LIBRARIES(dl)
+else(ANDROID)
+	if(NOT MINGW)
+		LINK_LIBRARIES(pthread dl)
+	endif(NOT MINGW)
+endif(ANDROID)
 

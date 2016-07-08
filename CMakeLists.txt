@@ -1,61 +1,75 @@
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmakemodules)
-
+#
+# This section is used to set the basic configuration for CMAKE
+#
 IF(WIN32)
-	cmake_minimum_required(VERSION 3.1.3)
+	cmake_minimum_required(VERSION 3.2)
 	set_property(GLOBAL PROPERTY USE_FOLDERS On)
 ELSE()
-	cmake_minimum_required(VERSION 3.1.3)
+	cmake_minimum_required(VERSION 3.2)
 ENDIF()
+cmake_policy(SET CMP0048 NEW)
 
-project(OpenVEILPythonWrapper C CXX)
-
-IF(WIN32)
-	if(MSVC_IDE)
-		set(TS_INSTALL_PREFIX       "c:/TecSec/VEIL_7-0")
-	else(MSVC_IDE)
-		set(TS_INSTALL_PREFIX       "c:/TecSec/VEIL_7-0")
-	endif(MSVC_IDE)
-	set(TS_INSTALL_PREFIX_DEBUG   "c:/TecSec/VEIL_7-0")
-	set(TS_INSTALL_PREFIX_RELEASE "c:/TecSec/VEIL_7-0")
-ELSE(WIN32)
-	SET(TS_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/../local" CACHE STRING "The install path to use for Linux")
-ENDIF(WIN32)
-
-set(TS_MODULE OpenVEILPython)
-
-include(tecsec_top)
-include(precompiled.header)
-set(TS_INSTALL_PREFIX ${TS_INSTALL_PREFIX}/${TS_TOOLSET})
-include (tecsec_installdirs)
-
-include(summary)
-include(${ALLBIN_DIR}/VEILApiVersion.cmake)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmakemodules")
 
 set(CMAKE_BUILD_TYPE ${TS_VS_CONFIG} CACHE STRING "The configuration build type")
 if (CMAKE_CONFIGURATION_TYPES)
   set (CMAKE_CONFIGURATION_TYPES ${TS_VS_CONFIG})
-  set (CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING "Reset the configurations for ${VEILCORENAME}" )
+  set (CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
+	"Reset the configurations" )
 endif()
 
+#
+# Set up the project name and look for the compiler configuration
+#
+project(OpenVEILPythonWrapper C CXX)
 
-# # IF(WIN32)
-# # set(BOOST_ROOT c:/boost;${CMAKE_CURRENT_SOURCE_DIR}/../boost_1_59_0;${CMAKE_CURRENT_SOURCE_DIR}/../boost;C:/Program Files/boost_1_59_0)
-# # ELSE(WIN32)
-# # set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../boost_1_59_0;${CMAKE_CURRENT_SOURCE_DIR}/../boost;C:/Program Files/boost_1_59_0)
-# # ENDIF(WIN32)
+#
+# Configure some of the Linux SO parameters
+#
+if(UNIX)
+    SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    SET(CMAKE_INSTALL_RPATH "$ORIGIN")
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+endif(UNIX)
 
-# set(Boost_DEBUG OFF)
-# set(Boost_ADDITIONAL_VERSIONS 1.60 1.59)
-# set(Boost_USE_MULTITHREADED ON)
-# set(Boost_USE_STATIC_LIBS       OFF)
-# set(Boost_USE_STATIC_RUNTIME    OFF)
+#
+# Include the TecSec macros and variables.  Look for the OpaqueVEIL, OpenVEIL and VEILCrypto
+#
+include(tecsec_configure_env)
+include(tecsec_ConfigureOpenVEIL)
+set(SDK_FOLDER ${VEIL_ROOT_DIR}/..)
+set(TS_INSTALL_PREFIX ${VEIL_ROOT_DIR})
+include (tecsec_installdirs)
+include(tecsec_packages)
+IF(MSVC)
+	# include(compiler_tecsec_msvc.noWarnings)
+ENDIF(MSVC)
+include(precompiled.header)
+include(summary)
 
-# FIND_PACKAGE(Boost 1.59 COMPONENTS python3 REQUIRED)
-# message(STATUS Boost_INCLUDE_DIRS = ${Boost_INCLUDE_DIRS})
-# message(STATUS Boost_LIBRARY_DIRS = ${Boost_LIBRARY_DIRS})
-# message(STATUS Boost_PYTHON3_LIBRARY = ${Boost_PYTHON3_LIBRARY})
-# message(STATUS Boost_LIBRARIES = ${Boost_LIBRARIES})
+#
+# Place the output into these folders
+#
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PUBLIC_BINARY_TOP_DIR}/lib")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PUBLIC_BINARY_TOP_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PUBLIC_BINARY_TOP_DIR}/bin")
 
+#####################################################################
+## Start Options
+#####################################################################
+
+add_definitions(-DHIDE_SERVICE_LOCATOR)
+set(ENABLE_SMART_CARD OFF)
+set(NO_PCH OFF)
+
+#####################################################################
+## End Options
+#####################################################################
+
+#
+# Look for optional packages here
+#
 set(Python_ADDITIONAL_VERSIONS 3.5.1 3.5 3.4)
 FIND_PACKAGE(PythonInterp)
 if(PYTHONINTERP_FOUND)
@@ -75,6 +89,21 @@ message(STATUS PYTHON_LIBRARY_RELEASE = ${PYTHON_LIBRARY_RELEASE})
 	endif()
 endif(PYTHONINTERP_FOUND)
 
+#
+# set up the solution specific files (replaces variables and copies to the output folders)
+#
+
+#
+# Configure the system using settings in the imported targets
+#
+ImportTarget(VEILCryptoCore)
+ImportTarget(VEILCore)
+ImportTarget(VEILCmsHeader)
+ImportTarget(VEILFileSupport)
+
+#
+# Set up the project level include paths
+#
 if(PYTHONLIBS_FOUND)
   include_directories(${PYTHON_INCLUDE_PATH})
   link_directories(${PYTHON_LIBRARY_DIRS})
@@ -85,15 +114,22 @@ if(Boost_FOUND)
 endif()
 include_directories(ThirdParty/pybind11/include)
 
-add_uninstall()
-
+#
+# Now include the sub-folder CMakeLists.txt files
+#
 add_subdirectory(src)
 
-summary()
-
+#
+# Copy the modules from the required imported targets so that the programs in this
+# project can run
+#
 CopyImportTargetBinaries(VEILCore ${BIN_DIR})
 CopyImportTargetBinaries(VEILFileSupport ${BIN_DIR})
 CopyImportTargetBinaries(VEILCmsHeader ${BIN_DIR})
+
+#
+# Set up the files that are "installed" from this CMakeLists.txt
+#
 list(GET Boost_LIBRARIES 1 _tmp)
 get_filename_component(__boostPath ${_tmp} DIRECTORY)
 get_filename_component(__boostFile ${_tmp} NAME_WE)
@@ -102,3 +138,18 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Samples/tokenList.py ${CMAKE_CURRENT_S
 # DumpAllVariables()
 # get_filename_component(__pythonPath ${PYTHON_EXECUTABLE} DIRECTORY)
 # install(FILES ${__pythonPath}/python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${BIN_DIR})
+
+#
+# This is where CPack (if used) would be set up
+#
+
+#
+# Now issue the summary configuration screen
+#
+summary()
+
+#
+# Set up the "uninstall" project
+#
+add_uninstall()
+

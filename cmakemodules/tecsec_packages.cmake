@@ -29,6 +29,49 @@
 #
 # Written by Roger Butler
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX")
-set(CMAKE_MANAGED_CPP_V40_FLAGS "${CMAKE_MANAGED_CPP_V40_FLAGS} -WX")
-set(CMAKE_MANAGED_CPP_V45_FLAGS "${CMAKE_MANAGED_CPP_V45_FLAGS} -WX")
+
+IF(WIN32)
+	SET(GMOCK_ROOT c:/GoogleTest/${TS_TOOLSET}_${TS_X_PLATFORM})
+	SET(GTEST_ROOT c:/GoogleTest/${TS_TOOLSET}_${TS_X_PLATFORM})
+	SET(ZLIB_ROOT S:/ThirdParty/redist)
+	SET(BZ2_ROOT S:/ThirdParty/redist)
+	SET(HARU_ROOT S:/ThirdParty/redist)
+	SET(BOOST_ROOT S:/ThirdParty/redist)
+ENDIF(WIN32)
+
+IF(NOT EXISTS "${PUBLIC_SOURCE_TOP_DIR}/ThirdParty/bzip2")
+		find_package(BZ2)
+ENDIF(NOT EXISTS "${PUBLIC_SOURCE_TOP_DIR}/ThirdParty/bzip2")
+
+IF(NOT EXISTS "${PUBLIC_SOURCE_TOP_DIR}/ThirdParty/zlib")
+		find_package(ZLIB)
+ENDIF(NOT EXISTS "${PUBLIC_SOURCE_TOP_DIR}/ThirdParty/zlib")
+	
+find_package(Haru)
+#~ find_package(Threads)
+find_package(GMock)
+find_package(GTest)
+# find_package(Boost)
+set(wxWidgets_EXCLUDE_COMMON_LIBRARIES ON)
+find_package(wxWidgets COMPONENTS core base adv )
+
+
+if(ZLIB_FOUND)
+		include_directories($<TARGET_PROPERTY:ZLIB,INTERFACE_INCLUDE_DIRECTORIES>)
+endif(ZLIB_FOUND)
+if(BZ2_FOUND)
+		include_directories($<TARGET_PROPERTY:BZ2,INTERFACE_INCLUDE_DIRECTORIES>)
+endif(BZ2_FOUND)
+if(HARU_FOUND)
+		include_directories($<TARGET_PROPERTY:HARU,INTERFACE_INCLUDE_DIRECTORIES>)
+endif(HARU_FOUND)
+if(GTEST_FOUND)
+		include_directories($<TARGET_PROPERTY:GTEST,INTERFACE_INCLUDE_DIRECTORIES>)
+endif(GTEST_FOUND)
+if(GMOCK_FOUND)
+		include_directories($<TARGET_PROPERTY:GMOCK,INTERFACE_INCLUDE_DIRECTORIES>)
+endif(GMOCK_FOUND)
+if(Boost_FOUND)
+		include_directories(${Boost_INCLUDE_DIRS})
+endif(Boost_FOUND)
+

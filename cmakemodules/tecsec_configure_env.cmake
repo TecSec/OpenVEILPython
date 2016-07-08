@@ -1,4 +1,4 @@
-#	Copyright (c) 2015, TecSec, Inc.
+#	Copyright (c) 2016, TecSec, Inc.
 #
 #	Redistribution and use in source and binary forms, with or without
 #	modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,9 @@
 #	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 #	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Written by Roger Butler
+
 # if (CMAKE_CONFIGURATION_TYPES)
   # set (CMAKE_CONFIGURATION_TYPES Debug Release RelWithDebInfo)
   # set (CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
@@ -45,25 +48,6 @@ endif()
 
 set(TECSEC_TOOLS_DIR ${PUBLIC_SOURCE_TOP_DIR}/../utils)
 set(CMAKE_DEBUG_POSTFIX "d")
-
-# Generate the version strings
-mark_as_advanced(BUILDNUMBER)
-set(TSF_SHORT_VERSION "${TSF_MAJOR_VERSION}.${TSF_MINOR_VERSION}.${TSF_REV_VERSION}")
-add_definitions(-DBUILDNUMBER=${BUILDNUMBER})
-string(REPLACE "\"" "" TSF_BUILDNUMBER "${BUILDNUMBER}")
-set(TSF_FULL_VERSION "${TSF_MAJOR_VERSION}.${TSF_MINOR_VERSION}.${TSF_REV_VERSION}.${TSF_BUILDNUMBER}")
-set(TSF_FULL_VERSION_COMMAS "${TSF_MAJOR_VERSION},${TSF_MINOR_VERSION},${TSF_REV_VERSION},${TSF_BUILDNUMBER}")
-
-set(TSF_MAJOR_MINOR "${TSF_MAJOR_VERSION}.${TSF_MINOR_VERSION}")
-set(TSF_MAJOR_MINOR_DASH "${TSF_MAJOR_VERSION}-${TSF_MINOR_VERSION}")
-
-#PolicyFileName=policy.4.2
-set(TSF_POLICYFILENAME "policy.${TSF_MAJOR_MINOR}")
-if(TSF_INCPOLICY)
-  set(TSF_INCLUDE_POLICY "True")
-else(TSF_INCPOLICY)
-  set(TSF_INCLUDE_POLICY "")
-endif(TSF_INCPOLICY)
 
 if(MSVC_IDE)
     set(TS_CONFIG "${TS_VS_CONFIG}")
@@ -101,7 +85,10 @@ endif(FORCE_X86)
 
 set(TS_TOOLSET "OTHER")
 if(CMAKE_COMPILER_IS_GNUCC)
-  set(TS_TOOLSET "gcc")
+  set(TS_TOOLSET "gcc_${CMAKE_CXX_COMPILER_VERSION}$ENV{TS_GCC_THREAD}")
+  if(ANDROID)
+	set(TS_TOOLSET ${TS_TOOLSET}-Android${ANDROID_NATIVE_API_LEVEL}-${CMAKE_ANDROID_ARCH})
+  endif(ANDROID)
 elseif(WIN32)
   if(CMAKE_VS_PLATFORM_TOOLSET STREQUAL "v140")
     set(TS_TOOLSET "vc14")
@@ -258,15 +245,49 @@ set(SG_OS_LIBS uuid pthread dl m)
 
 endif () # "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux"
 
-IF(WIN32)
-	SET(GMOCK_ROOT S:/ThirdParty/redist)
-	SET(GTEST_ROOT S:/ThirdParty/redist)
-	SET(ZLIB_ROOT S:/ThirdParty/redist)
-	SET(BZ2_ROOT S:/ThirdParty/redist)
-	SET(HARU_ROOT S:/ThirdParty/redist)
-	# SET(BOOST_ROOT S:/ThirdParty/redist)
-ENDIF(WIN32)
+# IF(WIN32)
+# 	SET(GMOCK_ROOT c:/GoogleTest/${TS_TOOLSET}_${TS_X_PLATFORM})
+# 	SET(GTEST_ROOT c:/GoogleTest/${TS_TOOLSET}_${TS_X_PLATFORM})
+# 	SET(ZLIB_ROOT S:/ThirdParty/redist)
+# 	SET(BZ2_ROOT S:/ThirdParty/redist)
+# 	SET(HARU_ROOT S:/ThirdParty/redist)
+# 	SET(BOOST_ROOT S:/ThirdParty/redist)
+# ENDIF(WIN32)
 
+# IF(IS_OPAQUEVEIL)
+# 	IF(NOT EXISTS "${PUBLIC_SOURCE_TOP_DIR}/ThirdParty/bzip2")
+# 		find_package(BZ2)
+# 	ENDIF(NOT EXISTS "${PUBLIC_SOURCE_TOP_DIR}/ThirdParty/bzip2")
+
+# 	IF(NOT EXISTS "${PUBLIC_SOURCE_TOP_DIR}/ThirdParty/zlib")
+# 		find_package(ZLIB)
+# 	ENDIF(NOT EXISTS "${PUBLIC_SOURCE_TOP_DIR}/ThirdParty/zlib")
+	
+# 	find_package(Haru)
+# 	#~ find_package(Threads)
+# 	find_package(GMock)
+# 	find_package(GTest)
+# 	# find_package(Boost)
+	
+# 	if(ZLIB_FOUND)
+# 		include_directories($<TARGET_PROPERTY:ZLIB,INTERFACE_INCLUDE_DIRECTORIES>)
+# 	endif(ZLIB_FOUND)
+# 	if(BZ2_FOUND)
+# 		include_directories($<TARGET_PROPERTY:BZ2,INTERFACE_INCLUDE_DIRECTORIES>)
+# 	endif(BZ2_FOUND)
+# 	if(HARU_FOUND)
+# 		include_directories($<TARGET_PROPERTY:HARU,INTERFACE_INCLUDE_DIRECTORIES>)
+# 	endif(HARU_FOUND)
+# 	if(GTEST_FOUND)
+# 		include_directories($<TARGET_PROPERTY:GTEST,INTERFACE_INCLUDE_DIRECTORIES>)
+# 	endif(GTEST_FOUND)
+# 	if(GMOCK_FOUND)
+# 		include_directories($<TARGET_PROPERTY:GMOCK,INTERFACE_INCLUDE_DIRECTORIES>)
+# 	endif(GMOCK_FOUND)
+# 	if(Boost_FOUND)
+# 		include_directories(${Boost_INCLUDE_DIRS})
+# 	endif(Boost_FOUND)
+# ENDIF(IS_OPAQUEVEIL)
 
 include (tecsec_base_macros)
 

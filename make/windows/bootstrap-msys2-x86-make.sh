@@ -1,3 +1,4 @@
+#!bash
 #	Copyright (c) 2016, TecSec, Inc.
 #
 #	Redistribution and use in source and binary forms, with or without
@@ -29,6 +30,30 @@
 #
 # Written by Roger Butler
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX")
-set(CMAKE_MANAGED_CPP_V40_FLAGS "${CMAKE_MANAGED_CPP_V40_FLAGS} -WX")
-set(CMAKE_MANAGED_CPP_V45_FLAGS "${CMAKE_MANAGED_CPP_V45_FLAGS} -WX")
+processors=(X86)
+if ["$1" == ""]; then
+    configurations=(Release Debug)
+else
+    configurations=($1)
+fi
+
+if !([ -d ../../build ]); then mkdir ../../build; fi
+
+cd ../..
+
+for i in ${configurations[@]}; do
+    for j in ${processors[@]}; do
+        dir="$(echo msys2-${i}-${j} | tr '[:upper:]' '[:lower:]')";
+
+	if !([ -d build/${dir} ]); then mkdir build/${dir}; fi
+
+	cd build/${dir}
+	cmake -DFORCE_${j}=1 -DCMAKE_INSTALL_PREFIX:PATH=~/tecsec -DCMAKE_BUILD_TYPE=${i} -G "MSYS Makefiles" ../../
+	cd ../..
+    done
+done
+
+#cd build/debug
+#make
+#cd ../..
+

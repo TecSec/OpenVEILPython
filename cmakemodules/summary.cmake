@@ -1,4 +1,4 @@
-#	Copyright (c) 2015, TecSec, Inc.
+#	Copyright (c) 2016, TecSec, Inc.
 #
 #	Redistribution and use in source and binary forms, with or without
 #	modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,8 @@
 #	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 #	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Written by Roger Butler
 
 # =======================================================================
 # print summary of configuration to screen
@@ -35,85 +37,123 @@ macro(summary)
 set(_output_results "
 Summary of CMake build system results for the TecSec component
 
-Library options:
-TS_X_PLATFORM:                  ${TS_X_PLATFORM}
-TS_TOOLSET:                     ${TS_TOOLSET}
-CMAKE_VS_PLATFORM_TOOLSET:      ${CMAKE_VS_PLATFORM_TOOLSET}
-TS_VS_CONFIGURATION:            ${TS_VS_CONFIGURATION}
-Postfix for DLLS...             ${CMAKE_${TS_CONFIG}_POSTFIX}
+Configuration options:
+   TS_X_PLATFORM:                  ${TS_X_PLATFORM}
+   TS_TOOLSET:                     ${TS_TOOLSET}
+   CMAKE_VS_PLATFORM_TOOLSET:      ${CMAKE_VS_PLATFORM_TOOLSET}
+   TS_VS_CONFIGURATION:            ${TS_VS_CONFIGURATION}
+   Postfix for DLLS...             ${CMAKE_${TS_CONFIG}_POSTFIX}
 
 Other important CMake variables:
+   CMAKE_SYSTEM_NAME:  ${CMAKE_SYSTEM_NAME}
+   UNIX:               ${UNIX}
+   WIN32:              ${WIN32}
+   APPLE:              ${APPLE}
+   MSVC_IDE:           ${MSVC_IDE}
+   MSVC:               ${MSVC} (MSVC_VERSION:  ${MSVC_VERSION})
+   MINGW:              ${MINGW}
+   MSYS:               ${MSYS}
+   CYGWIN:             ${CYGWIN}
 
-CMAKE_SYSTEM_NAME:  ${CMAKE_SYSTEM_NAME}
-UNIX:               ${UNIX}
-WIN32:              ${WIN32}
-APPLE:              ${APPLE}
-MSVC_IDE:           ${MSVC_IDE}
-MSVC:               ${MSVC} (MSVC_VERSION:  ${MSVC_VERSION})
-MINGW:              ${MINGW}
-MSYS:               ${MSYS}
-CYGWIN:             ${CYGWIN}
-ANDROID:            ${ANDROID}
+Compilation Options:
+   CMAKE_BUILD_TYPE:               ${CMAKE_BUILD_TYPE}
+   CMAKE_C_COMPILER CMAKE_C_FLAGS: ${CMAKE_C_COMPILER}
+   CMAKE_C_FLAGS:                  ${CMAKE_C_FLAGS}
+   CMAKE_CXX_FLAGS:                ${CMAKE_CXX_FLAGS}
+   CMAKE_EXECUTABLE_SUFFIX:        ${CMAKE_EXECUTABLE_SUFFIX}
+   CMAKE_SHARED_MODULE_PREFIX:     ${CMAKE_SHARED_MODULE_PREFIX}
+   CMAKE_SHARED_MODULE_SUFFIX:     ${CMAKE_SHARED_MODULE_SUFFIX}
+   CMAKE_INSTALL_PREFIX:           ${CMAKE_INSTALL_PREFIX}
+   CMAKE_INSTALL_EXEC_PREFIX       ${CMAKE_INSTALL_EXEC_PREFIX}
+   CMAKE_INSTALL_BINDIR            ${CMAKE_INSTALL_BINDIR}
+   CMAKE_INSTALL_LIBDIR            ${CMAKE_INSTALL_LIBDIR}
+   CMAKE_INSTALL_INCLUDEDIR        ${CMAKE_INSTALL_INCLUDEDIR}
 
-CMAKE_BUILD_TYPE:               ${CMAKE_BUILD_TYPE}
-CMAKE_C_COMPILER CMAKE_C_FLAGS: ${CMAKE_C_COMPILER}
-CMAKE_C_FLAGS:                  ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${TS_CONFIG}}
-CMAKE_CXX_FLAGS:                ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${TS_CONFIG}}
-CMAKE_EXECUTABLE_SUFFIX:        ${CMAKE_EXECUTABLE_SUFFIX}
-CMAKE_SHARED_MODULE_PREFIX:     ${CMAKE_SHARED_MODULE_PREFIX}
-CMAKE_SHARED_MODULE_SUFFIX:     ${CMAKE_SHARED_MODULE_SUFFIX}
-CMAKE_INSTALL_PREFIX:           ${CMAKE_INSTALL_PREFIX}
-CMAKE_INSTALL_EXEC_PREFIX       ${CMAKE_INSTALL_EXEC_PREFIX}
-CMAKE_INSTALL_BINDIR            ${CMAKE_INSTALL_BINDIR}
-CMAKE_INSTALL_LIBDIR            ${CMAKE_INSTALL_LIBDIR}
-CMAKE_INSTALL_INCLUDEDIR        ${CMAKE_INSTALL_INCLUDEDIR}
+Build Paths:
+   CRYPTO_INSTALL_PREFIX           ${CRYPTO_INSTALL_PREFIX} (VERSION: ${CRYPTO_VERSION})
+   SOURCE_DIR:                     ${SOURCE_DIR}
+   BUILD_DIR:                      ${BUILD_DIR}
+   CMAKE_ARCHIVE_OUTPUT_DIRECTORY: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+   CMAKE_LIBRARY_OUTPUT_DIRECTORY: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+   CMAKE_RUNTIME_OUTPUT_DIRECTORY: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 
-TS_INSTALL_PREFIX:              ${TS_INSTALL_PREFIX}
-DATA_DIR:                       ${DATA_DIR}
-INCLUDE_DIR:                    ${INCLUDE_DIR}
-ALLBIN_DIR:                     ${ALLBIN_DIR}
-BIN_DIR:                        ${BIN_DIR}
-LIB_DIR:                        ${LIB_DIR}
-SHLIB_DIR:                      ${SHLIB_DIR}
-DOC_DIR:                        ${DOC_DIR}
-INFO_DIR:                       ${INFO_DIR}
-MAN_DIR:                        ${MAN_DIR}
-BUILD_DIR:                      ${BUILD_DIR}
-SOURCE_DIR:                     ${SOURCE_DIR}
-INSTALL_BIN_DIR:                ${INSTALL_BIN_DIR}
-INSTALL_SHLIB_DIR:              ${INSTALL_SHLIB_DIR}
-INSTALL_LIB_DIR:                ${INSTALL_LIB_DIR}
-INSTALL_OTHER_DIR:              ${INSTALL_OTHER_DIR}
+Install Paths:
+   TS_INSTALL_PREFIX:              ${TS_INSTALL_PREFIX}
+   DATA_DIR:                       ${DATA_DIR}
+   INCLUDE_DIR:                    ${INCLUDE_DIR}
+   ALLBIN_DIR:                     ${ALLBIN_DIR}
+   BIN_DIR:                        ${BIN_DIR}
+   LIB_DIR:                        ${LIB_DIR}
+   SHLIB_DIR:                      ${SHLIB_DIR}
+   DOC_DIR:                        ${DOC_DIR}
+   INFO_DIR:                       ${INFO_DIR}
+   MAN_DIR:                        ${MAN_DIR}
 
 Optional libraries:")
+if(TARGET VEILEnhancedCrypto)
+set(_output_results "${_output_results}
+   VEILEnhancedCrypto FOUND ${CRYPTO_VERSION}")
+else()
+set(_output_results "${_output_results}
+   VEILEnhancedCrypto missing")
+endif(TARGET VEILEnhancedCrypto)
+if (BZ2_FOUND)
+set(_output_results "${_output_results}
+   BZ2                FOUND ${BZ2_VERSION_STRING}")
+else()
+set(_output_results "${_output_results}
+   BZ2                missing")
+endif(BZ2_FOUND)
 if (ZLIB_FOUND)
 set(_output_results "${_output_results}
-ZLIB_FOUND")
-endif(ZLIB_FOUND)
-if (PNG_FOUND)
+   ZLIB               FOUND ${ZLIB_VERSION_STRING}")
+else()
 set(_output_results "${_output_results}
-PNG_FOUND")
-endif(PNG_FOUND)
+   ZLIB               missing")
+endif(ZLIB_FOUND)
+if (HARU_FOUND)
+set(_output_results "${_output_results}
+   HARU               FOUND ${HARU_VERSION_STRING}")
+else()
+set(_output_results "${_output_results}
+   HARU               missing")
+endif(HARU_FOUND)
+if (wxWidgets_FOUND)
+set(_output_results "${_output_results}
+   wxWidgets          FOUND ${wxWidgets_VERSION_STRING}")
+else()
+set(_output_results "${_output_results}
+   wxWidgets          missing")
+endif(wxWidgets_FOUND)
 if (GMOCK_FOUND)
 set(_output_results "${_output_results}
-GMOCK_FOUND")
+   GMOCK              FOUND")
+else()
+set(_output_results "${_output_results}
+   GMOCK              missing")
 endif(GMOCK_FOUND)
 if (GTEST_FOUND)
 set(_output_results "${_output_results}
-GTEST_FOUND")
+   GTEST              FOUND")
+else()
+set(_output_results "${_output_results}
+   GTEST              missing")
 endif(GTEST_FOUND)
+if (PNG_FOUND)
+set(_output_results "${_output_results}
+   PNG                FOUND")
+else()
+set(_output_results "${_output_results}
+   PNG                missing")
+endif(PNG_FOUND)
 if (Boost_FOUND)
 set(_output_results "${_output_results}
-Boost_FOUND")
+   Boost              FOUND")
+else()
+set(_output_results "${_output_results}
+   Boost              missing")
 endif(Boost_FOUND)
-if (BZ2_FOUND)
-set(_output_results "${_output_results}
-BZ2_FOUND")
-endif(BZ2_FOUND)
-if (HARU_FOUND)
-set(_output_results "${_output_results}
-HARU_FOUND")
-endif(HARU_FOUND)
 
-message("${_output_results}")
+message("${_output_results}
+")
 endmacro(summary)

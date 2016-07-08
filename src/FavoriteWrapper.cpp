@@ -93,13 +93,13 @@ void FavoriteWrapper::setTokenSerialNumber(const std::string& setTo)
 {
 	if (!isReady())
 		return;
-	_favorite->tokenSerialNumber((tsAscii(setTo.c_str())).HexToData());
+	_favorite->tokenSerialNumber((tsCryptoString(setTo.c_str())).HexToData());
 }
 byte_array FavoriteWrapper::getHeaderData()
 {
 	if (!isReady())
 		return byte_array();
-	tsData data(_favorite->headerData());
+	tsCryptoData data(_favorite->headerData());
 
 	return tsDataToPyObject(data);
 }
@@ -114,8 +114,8 @@ bool FavoriteWrapper::encryptFile(SessionWrapper session, const std::string& sou
 	std::shared_ptr<IFileVEILOperations> fileOps;
 	std::shared_ptr<ICmsHeader> header;
 	std::shared_ptr<IFileVEILOperationStatus> status;
-	tsAscii inputFile(sourceFile.c_str());
-	tsAscii outputFile(encryptedFile.c_str());
+	tsCryptoString inputFile(sourceFile.c_str());
+	tsCryptoString outputFile(encryptedFile.c_str());
 
 	if (!isReady())
 		return false;
@@ -125,12 +125,12 @@ bool FavoriteWrapper::encryptFile(SessionWrapper session, const std::string& sou
 
 	if (xp_GetFileAttributes(inputFile) == XP_INVALID_FILE_ATTRIBUTES || xp_IsDirectory(inputFile))
 	{
-		PyErr_SetString(PyExc_RuntimeError, (tsAscii() << "File -> " << inputFile.c_str() << " <- does not exist Encrypt operation aborted").c_str());
+		PyErr_SetString(PyExc_RuntimeError, (tsCryptoString() << "File -> " << inputFile.c_str() << " <- does not exist Encrypt operation aborted").c_str());
 		throw py::error_already_set();
 		return false;
 	}
 
-	status = ::ServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
+	status = ::TopServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
 
 	if (!(fileOps = CreateFileVEILOperationsObject()) ||
 		!(fileOps->SetStatusInterface(status)) ||
@@ -147,7 +147,7 @@ bool FavoriteWrapper::encryptFile(SessionWrapper session, const std::string& sou
 		outputFile = inputFile;
 		outputFile += ".ckm";
 	}
-	if (!(header = ::ServiceLocator()->get_instance<ICmsHeader>("/CmsHeader")) || !header->FromBytes(_favorite->headerData()))
+	if (!(header = ::TopServiceLocator()->get_instance<ICmsHeader>("/CmsHeader")) || !header->FromBytes(_favorite->headerData()))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "An error occurred while building the encryption header.");
 		throw py::error_already_set();
@@ -163,14 +163,14 @@ bool FavoriteWrapper::encryptFile(SessionWrapper session, const std::string& sou
 	{
 		header->SetCompressionType(ct_None);
 	}
-	if (header->GetEncryptionAlgorithmID() == TS_ALG_INVALID)
-		header->SetEncryptionAlgorithmID(TS_ALG_AES_GCM_256);
+	if (header->GetEncryptionAlgorithmID() == tscrypto::_TS_ALG_ID::TS_ALG_INVALID)
+		header->SetEncryptionAlgorithmID(tscrypto::_TS_ALG_ID::TS_ALG_AES_GCM_256);
 
 	if (!(fileOps->EncryptFileAndStreams(inputFile.c_str(), outputFile.c_str(), header, compress ? ct_zLib : ct_None,
 		header->GetEncryptionAlgorithmID(), OIDtoID(header->GetDataHashOID().ToOIDString().c_str()),
 		header->HasHeaderSigningPublicKey(), true,
-		(Alg2Mode(header->GetEncryptionAlgorithmID()) == CKM_SymMode_GCM ||
-			Alg2Mode(header->GetEncryptionAlgorithmID()) == CKM_SymMode_CCM) ?
+		(Alg2Mode(header->GetEncryptionAlgorithmID()) == tscrypto::_SymmetricMode::CKM_SymMode_GCM ||
+			Alg2Mode(header->GetEncryptionAlgorithmID()) == tscrypto::_SymmetricMode::CKM_SymMode_CCM) ?
 		TS_FORMAT_CMS_ENC_AUTH : TS_FORMAT_CMS_CT_HASHED,
 		false, header->GetPaddingType(), 5000000)))
 	{
@@ -186,8 +186,8 @@ byte_array FavoriteWrapper::encryptData(SessionWrapper session, const byte_array
 	if (!isReady())
 		return byte_array();
 
-	tsData inData(tsDataFromPyObject(sourceData));
-	tsData encData;
+	tsCryptoData inData(tsDataFromPyObject(sourceData));
+	tsCryptoData encData;
 
 	if (inData.size() == 0)
 	{
@@ -208,7 +208,7 @@ byte_array FavoriteWrapper::encryptData(SessionWrapper session, const byte_array
 		return byte_array();
 	}
 
-	status = ::ServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
+	status = ::TopServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
 
 	if (!(fileOps = CreateFileVEILOperationsObject()) ||
 		!(fileOps->SetStatusInterface(status)) ||
@@ -218,7 +218,7 @@ byte_array FavoriteWrapper::encryptData(SessionWrapper session, const byte_array
 		throw py::error_already_set();
 		return byte_array();
 	}
-	if (!(header = ::ServiceLocator()->get_instance<ICmsHeader>("/CmsHeader")) || !header->FromBytes(_favorite->headerData()))
+	if (!(header = ::TopServiceLocator()->get_instance<ICmsHeader>("/CmsHeader")) || !header->FromBytes(_favorite->headerData()))
 	{
 		PyErr_SetString(PyExc_RuntimeError, "An error occurred while building the encryption header.");
 		throw py::error_already_set();
@@ -241,14 +241,14 @@ byte_array FavoriteWrapper::encryptData(SessionWrapper session, const byte_array
 	{
 		header->SetCompressionType(ct_None);
 	}
-	if (header->GetEncryptionAlgorithmID() == TS_ALG_INVALID)
-		header->SetEncryptionAlgorithmID(TS_ALG_AES_GCM_256);
+	if (header->GetEncryptionAlgorithmID() == tscrypto::_TS_ALG_ID::TS_ALG_INVALID)
+		header->SetEncryptionAlgorithmID(tscrypto::_TS_ALG_ID::TS_ALG_AES_GCM_256);
 
 	if (!(fileOps->EncryptCryptoData(inData, encData, header, compress ? ct_zLib : ct_None,
 		header->GetEncryptionAlgorithmID(), OIDtoID(header->GetDataHashOID().ToOIDString().c_str()),
 		header->HasHeaderSigningPublicKey(), true,
-		(Alg2Mode(header->GetEncryptionAlgorithmID()) == CKM_SymMode_GCM ||
-			Alg2Mode(header->GetEncryptionAlgorithmID()) == CKM_SymMode_CCM) ?
+		(Alg2Mode(header->GetEncryptionAlgorithmID()) == tscrypto::_SymmetricMode::CKM_SymMode_GCM ||
+			Alg2Mode(header->GetEncryptionAlgorithmID()) == tscrypto::_SymmetricMode::CKM_SymMode_CCM) ?
 		TS_FORMAT_CMS_ENC_AUTH : TS_FORMAT_CMS_CT_HASHED,
 		false, header->GetPaddingType(), 5000000)))
 	{

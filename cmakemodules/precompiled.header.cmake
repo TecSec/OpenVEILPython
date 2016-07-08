@@ -78,6 +78,7 @@ function(export_all_flags _filename)
 endfunction()
 
 function(add_precompiled_header _target _input)
+  if(NOT NO_PCH)
   cmake_parse_arguments(_PCH "FORCEINCLUDE" "SOURCE_CXX:SOURCE_C" "" ${ARGN})
 
   get_filename_component(_input_we ${_input} NAME_WE)
@@ -163,4 +164,5 @@ function(add_precompiled_header _target _input)
       # endif()
     # endforeach()
   endif(CMAKE_COMPILER_IS_GNUCXX)
+  endif(NOT NO_PCH)
 endfunction()

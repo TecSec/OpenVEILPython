@@ -34,7 +34,7 @@
 Connector::Connector()
 {
 	// try_get_instance can return nullptr
-	conn = ::ServiceLocator()->try_get_instance<IKeyVEILConnector>("/KeyVEILConnector");
+	conn = ::TopServiceLocator()->try_get_instance<IKeyVEILConnector>("/KeyVEILConnector");
 
 	// get_instance throws exception
 	//conn = ::ServiceLocator()->get_instance<IKeyVEILConnector>("/KeyVEILConnector");	
@@ -120,8 +120,8 @@ py::tuple Connector::sendBase64Request(const std::string& verb, const std::strin
 		return py::make_tuple(false, "Connection object is not ready.", 1000);
 	}
 
-	tsData inDataTmp(tsDataFromPyObject(inData));
-	tsData outDataTmp;
+	tsCryptoData inDataTmp(tsDataFromPyObject(inData));
+	tsCryptoData outDataTmp;
 	int status = 0;
 
 	if (!conn->sendRequest(verb.c_str(), cmd.c_str(), inDataTmp, outDataTmp, status))
@@ -164,13 +164,13 @@ TokenWrapper KeyVEILConnectorWrapper::tokenByName(const std::string& tokenName)
 {
 	if (!isReady())
 		return TokenWrapper();
-	return TokenWrapper(conn->token(tsAscii(tokenName.c_str())));
+	return TokenWrapper(conn->token(tsCryptoString(tokenName.c_str())));
 }
 TokenWrapper KeyVEILConnectorWrapper::tokenBySerialNumber(const byte_array& serialNumber)
 {
 	if (!isReady())
 		return TokenWrapper();
-	tsData serial(tsDataFromPyObject(serialNumber));
+	tsCryptoData serial(tsDataFromPyObject(serialNumber));
 
 	return TokenWrapper(conn->token(serial));
 }
@@ -178,7 +178,7 @@ TokenWrapper KeyVEILConnectorWrapper::tokenById(const std::string& id)
 {
 	if (!isReady())
 		return TokenWrapper();
-	return TokenWrapper(conn->token(ToGuid()(tsAscii(id.c_str()))));
+	return TokenWrapper(conn->token(ToGuid()(tsCryptoString(id.c_str()))));
 }
 size_t KeyVEILConnectorWrapper::favoriteCount()
 {
@@ -196,53 +196,53 @@ FavoriteWrapper KeyVEILConnectorWrapper::favoriteByName(const std::string& name)
 {
 	if (!isReady())
 		return FavoriteWrapper();
-	return FavoriteWrapper(conn->favorite(tsAscii(name.c_str())));
+	return FavoriteWrapper(conn->favorite(tsCryptoString(name.c_str())));
 }
 FavoriteWrapper KeyVEILConnectorWrapper::favoriteById(const std::string& id)
 {
 	if (!isReady())
 		return FavoriteWrapper();
-	return FavoriteWrapper(conn->favorite(ToGuid()(tsAscii(id.c_str()))));
+	return FavoriteWrapper(conn->favorite(ToGuid()(tsCryptoString(id.c_str()))));
 }
-//GUID CreateFavorite(TokenWrapper token, const tsData& headerData, const tsAscii& name);
-//GUID CreateFavorite(const std::string& tokenId, const tsData& headerData, const tsAscii& name);
-//GUID CreateFavorite(const tsData& tokenSerial, const tsData& headerData, const tsAscii& name);
+//GUID CreateFavorite(TokenWrapper token, const tsCryptoData& headerData, const tsCryptoString& name);
+//GUID CreateFavorite(const std::string& tokenId, const tsCryptoData& headerData, const tsCryptoString& name);
+//GUID CreateFavorite(const tsCryptoData& tokenSerial, const tsCryptoData& headerData, const tsCryptoString& name);
 bool KeyVEILConnectorWrapper::DeleteFavorite(const std::string& id)
 {
 	if (!isReady())
 		return false;
-	return conn->DeleteFavorite(ToGuid()(tsAscii(id.c_str())));
+	return conn->DeleteFavorite(ToGuid()(tsCryptoString(id.c_str())));
 }
 bool KeyVEILConnectorWrapper::UpdateFavoriteName(const std::string& id, const std::string& name)
 {
 	if (!isReady())
 		return false;
-	return conn->UpdateFavoriteName(ToGuid()(tsAscii(id.c_str())), name.c_str());
+	return conn->UpdateFavoriteName(ToGuid()(tsCryptoString(id.c_str())), name.c_str());
 }
-//bool UpdateFavorite(const std::string& id, const tsData& setTo);
+//bool UpdateFavorite(const std::string& id, const tsCryptoData& setTo);
 size_t KeyVEILConnectorWrapper::tokenCountForEnterpriseId(const std::string& enterpriseId)
 {
 	if (!isReady())
 		return 0;
-	return conn->tokenCountForEnterprise(ToGuid()(tsAscii(enterpriseId.c_str())));
+	return conn->tokenCountForEnterprise(ToGuid()(tsCryptoString(enterpriseId.c_str())));
 }
 TokenWrapper KeyVEILConnectorWrapper::tokenForEnterprise(const std::string& enterpriseId, size_t index)
 {
 	if (!isReady())
 		return TokenWrapper();
-	return TokenWrapper(conn->tokenForEnterprise(ToGuid()(tsAscii(enterpriseId.c_str())), index));
+	return TokenWrapper(conn->tokenForEnterprise(ToGuid()(tsCryptoString(enterpriseId.c_str())), index));
 }
 size_t KeyVEILConnectorWrapper::favoriteCountForEnterprise(const std::string& enterpriseId)
 {
 	if (!isReady())
 		return 0;
-	return conn->favoriteCountForEnterprise(ToGuid()(tsAscii(enterpriseId.c_str())));
+	return conn->favoriteCountForEnterprise(ToGuid()(tsCryptoString(enterpriseId.c_str())));
 }
 FavoriteWrapper KeyVEILConnectorWrapper::favoriteForEnterprise(const std::string& enterpriseId, size_t index)
 {
 	if (!isReady())
 		return FavoriteWrapper();
-	return FavoriteWrapper(conn->favoriteForEnterprise(ToGuid()(tsAscii(enterpriseId.c_str())), index));
+	return FavoriteWrapper(conn->favoriteForEnterprise(ToGuid()(tsCryptoString(enterpriseId.c_str())), index));
 }
 #pragma endregion
 

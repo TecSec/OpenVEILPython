@@ -57,7 +57,7 @@ byte_array TokenWrapper::serialNumber()
 {
 	if (!isReady())
 		return byte_array();
-	tsData tmp(_token->serialNumber());
+	tsCryptoData tmp(_token->serialNumber());
 	return tsDataToPyObject(tmp);
 }
 std::string TokenWrapper::id()

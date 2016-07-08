@@ -45,7 +45,7 @@ void Environment::DispatchEvents()
 bool Environment::InitializeVEIL(bool initiateChangeMonitoring)
 {
 	// Forces the core system to initialize
-	if (!::ServiceLocator())
+	if (!TopServiceLocator())
 		return false;
 
 	if (initiateChangeMonitoring)
@@ -204,9 +204,9 @@ PYBIND11_PLUGIN(OpenVEIL)
 }
 
 
-tsData tsDataFromPyObject(const py::object& obj)
+tsCryptoData tsDataFromPyObject(const py::object& obj)
 {
-	tsData tmp;
+	tsCryptoData tmp;
 	char *data;
 	Py_ssize_t size;
 	PyObject* py_buffer = obj.ptr();
@@ -224,8 +224,8 @@ tsData tsDataFromPyObject(const py::object& obj)
 #ifdef Py_USING_UNICODE
 	else if (PyUnicode_Check(py_buffer)) {
 		size = PyUnicode_GET_SIZE(py_buffer);
-		tsAscii str(PyUnicode_AS_UNICODE(py_buffer), size);
-		tmp = str.ToUTF8Data();
+		CryptoUtf16 str(PyUnicode_AS_UNICODE(py_buffer), size);
+		tmp = str.toUtf8().ToUTF8Data();
 	}
 #endif
 #ifdef PyString_AS_STRING
@@ -241,7 +241,7 @@ tsData tsDataFromPyObject(const py::object& obj)
 	return tmp;
 }
 
-py::object tsDataToPyObject(const tsData& data)
+py::object tsDataToPyObject(const tsCryptoData& data)
 {
 	py::object o(PyByteArray_FromStringAndSize((const char *)data.c_str(), data.size()), false);
 	return o;

@@ -30,6 +30,8 @@
 
 #pragma once
 #include "VEIL.h"
+using namespace tscrypto;
+
 #include "VEILCmsHeader.h"
 #include "VEILFileSupport.h"
 #undef min
@@ -96,8 +98,8 @@ public:
 	LoginStatus Login(const std::string& pin);
 	bool IsLoggedIn();
 	bool Logout();
-	//bool GenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, std::function<bool(Asn1::CTS::CkmCombineParameters&, tsData&)> headerCallback, tsData &WorkingKey);
-	//bool RegenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, tsData &WorkingKey);
+	//bool GenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, std::function<bool(Asn1::CTS::CkmCombineParameters&, tsCryptoData&)> headerCallback, tsCryptoData &WorkingKey);
+	//bool RegenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, tsCryptoData &WorkingKey);
 	py::dict getProfile();
 	bool IsLocked();
 	size_t retriesLeft();
@@ -205,10 +207,10 @@ public:
 	FavoriteWrapper favoriteById(const std::string& id);
 	//std::string CreateFavorite(TokenWrapper token, const std::string& headerData, const std::string& name);
 	//std::string CreateFavorite(const std::string& tokenId, const std::string& headerData, const std::string& name);
-	//std::string CreateFavorite(const tsData& tokenSerial, const std::string& headerData, const std::string& name);
+	//std::string CreateFavorite(const tsCryptoData& tokenSerial, const std::string& headerData, const std::string& name);
 	bool DeleteFavorite(const std::string& id);
 	bool UpdateFavoriteName(const std::string& id, const std::string& name);
-	//bool UpdateFavorite(const std::string& id, const tsData& setTo);
+	//bool UpdateFavorite(const std::string& id, const tsCryptoData& setTo);
 	size_t tokenCountForEnterpriseId(const std::string& enterpriseId);
 	TokenWrapper tokenForEnterprise(const std::string& enterpriseId, size_t index);
 	size_t favoriteCountForEnterprise(const std::string& enterpriseId);
@@ -230,7 +232,7 @@ class StatusClass : public IFileVEILOperationStatus, public tsmod::IObject
 {
 public:
 	StatusClass() {}
-	virtual bool Status(const tsAscii& taskName, int taskNumber, int ofTaskCount, int taskPercentageDone)
+	virtual bool Status(const tsCryptoString& taskName, int taskNumber, int ofTaskCount, int taskPercentageDone)
 	{
 		//if (g_doStatus)
 		//{
@@ -238,7 +240,7 @@ public:
 		//}
 		return true;
 	}
-	virtual void    FailureReason(const tsAscii&failureText)
+	virtual void    FailureReason(const tsCryptoString&failureText)
 	{
 		//ERROR(failureText);
 	}
@@ -247,5 +249,5 @@ private:
 	virtual ~StatusClass() {}
 };
 
-extern tsData tsDataFromPyObject(const py::object& obj);
-extern py::object tsDataToPyObject(const tsData& data);
+extern tsCryptoData tsDataFromPyObject(const py::object& obj);
+extern py::object tsDataToPyObject(const tsCryptoData& data);

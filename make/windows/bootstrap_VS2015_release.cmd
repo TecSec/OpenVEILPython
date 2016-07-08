@@ -1,5 +1,5 @@
 @echo off
-rem	Copyright (c) 2015, TecSec, Inc.
+rem	Copyright (c) 2016, TecSec, Inc.
 rem
 rem	Redistribution and use in source and binary forms, with or without
 rem	modification, are permitted provided that the following conditions are met:
@@ -28,10 +28,6 @@ rem	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 rem	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 rem	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 rem
+rem Written by Roger Butler
 
-call CleanDebug.cmd
-
-call BuildDebug.cmd
-if errorlevel 1 goto end
-
-:end
+call bootstrap_VS_release 14

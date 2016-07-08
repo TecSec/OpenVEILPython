@@ -74,10 +74,10 @@ bool SessionWrapper::Logout()
 		return false;
 	return _session->Logout();
 }
-//bool SessionWrapper::GenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, std::function<bool(Asn1::CTS::CkmCombineParameters&, tsData&)> headerCallback, tsData &WorkingKey)
+//bool SessionWrapper::GenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, std::function<bool(Asn1::CTS::CkmCombineParameters&, tsCryptoData&)> headerCallback, tsCryptoData &WorkingKey)
 //{
 //}
-//bool SessionWrapper::RegenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, tsData &WorkingKey)
+//bool SessionWrapper::RegenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, tsCryptoData &WorkingKey)
 //{
 //}
 
@@ -201,17 +201,17 @@ bool SessionWrapper::decryptFile(const std::string& encryptedFile, const std::st
 
 	std::shared_ptr<IFileVEILOperations> fileOps;
 	std::shared_ptr<IFileVEILOperationStatus> status;
-	tsAscii inputFile(encryptedFile.c_str());
-	tsAscii outputFile(decryptedFile.c_str());
+	tsCryptoString inputFile(encryptedFile.c_str());
+	tsCryptoString outputFile(decryptedFile.c_str());
 
 	if (xp_GetFileAttributes(inputFile) == XP_INVALID_FILE_ATTRIBUTES || xp_IsDirectory(inputFile))
 	{
-		PyErr_SetString(PyExc_RuntimeError, (tsAscii() << "File -> " << inputFile << " <- does not exist Decrypt operation aborted").c_str());
+		PyErr_SetString(PyExc_RuntimeError, (tsCryptoString() << "File -> " << inputFile << " <- does not exist Decrypt operation aborted").c_str());
 		throw py::error_already_set();
 		return false;
 	}
 
-	status = ::ServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
+	status = ::TopServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
 
 	if (!(fileOps = CreateFileVEILOperationsObject()) ||
 		!(fileOps->SetStatusInterface(status)) ||
@@ -241,10 +241,10 @@ byte_array SessionWrapper::decryptData(const byte_array& encryptedData)
 
 	std::shared_ptr<IFileVEILOperations> fileOps;
 	std::shared_ptr<IFileVEILOperationStatus> status;
-	tsData inData(tsDataFromPyObject(encryptedData));
-	tsData destData;
+	tsCryptoData inData(tsDataFromPyObject(encryptedData));
+	tsCryptoData destData;
 
-	status = ::ServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
+	status = ::TopServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
 
 	if (!(fileOps = CreateFileVEILOperationsObject()) ||
 		!(fileOps->SetStatusInterface(status)) ||

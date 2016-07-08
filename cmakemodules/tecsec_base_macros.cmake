@@ -1,4 +1,4 @@
-#	Copyright (c) 2015, TecSec, Inc.
+#	Copyright (c) 2016, TecSec, Inc.
 #
 #	Redistribution and use in source and binary forms, with or without
 #	modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,8 @@
 #	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 #	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Written by Roger Butler
 
 macro(ConfigureExe target)
     set_target_properties(${target} PROPERTIES DEBUG_POSTFIX "d")
@@ -632,25 +634,25 @@ macro(Minify source dest)
 #		COMMAND 
 #			${CMAKE_COMMAND} -E chdir ${__destPath} java -jar s:/devsup/utils/yuicompressor-2.4.8.jar -o "${__destFile}" "${dest}.tmp.js"
                 COMMAND
-                        java.exe -jar s:/devsup/utils/yuicompressor-2.4.8.jar -o "${__destFile}" "${dest}.tmp.js" WORKING_DIRECTORY ${__destPath}
+                        java.exe -jar ${yuicompressor} -o "${__destFile}" "${dest}.tmp.js" WORKING_DIRECTORY ${__destPath}
 		COMMAND
 			${CMAKE_COMMAND} -E remove ${dest}.tmp.js
 	)
 endmacro()
 macro(add_uninstall)
-# add the uninstall support
-find_file(UNINSTALL_HELPER uninstall.cmake.in PATHS ${CMAKE_MODULE_PATH})
-if("${UNINSTALL_HELPER}" STREQUAL "UNINSTALL_HELPER-NOTFOUND")
-    MESSAGE(FATAL "The file uninstall.cmake.in could not be found.")
-endif()
-IF("${CMAKEMODULESPATH}" STREQUAL "")
-    SET(CMAKEMODULESPATH ${PUBLIC_SOURCE_TOP_DIR}/../cmakemodules)
-ENDIF()
-CONFIGURE_FILE("${UNINSTALL_HELPER}" "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake" IMMEDIATE @ONLY)
- 
-ADD_CUSTOM_TARGET(uninstall
- "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake")
-set_target_properties(uninstall PROPERTIES FOLDER "CMakePredefinedTargets")
+    # add the uninstall support
+    set(_tmp_sysroot ${CMAKE_SYSROOT})
+    set(CMAKE_SYSROOT "")
+    find_file(UNINSTALL_HELPER uninstall.cmake.in HINTS ${CMAKE_MODULE_PATH})
+    set(CMAKE_SYSROOT ${_tmp_sysroot})
+    if("${UNINSTALL_HELPER}" STREQUAL "UNINSTALL_HELPER-NOTFOUND")
+        MESSAGE(FATAL "The file uninstall.cmake.in could not be found.")
+    else()
+        CONFIGURE_FILE("${UNINSTALL_HELPER}" "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake" IMMEDIATE @ONLY)
+        
+        ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake")
+        set_target_properties(uninstall PROPERTIES FOLDER "CMakePredefinedTargets")
+    endif()
 endmacro()
 
 macro(ImportTarget target)
@@ -669,6 +671,21 @@ endmacro()
 macro(CopyImportTargetBinaries target dest)
 	get_property(_tmp TARGET ${target} PROPERTY INTERFACE_BIN_MODULES_${TS_CONFIG})
 	install(FILES ${_tmp} DESTINATION ${dest})
+endmacro()
+macro(CopyImportTargetBinariesToBuildFolder target dest)
+	get_property(_tmp TARGET ${target} PROPERTY INTERFACE_BIN_MODULES_${TS_CONFIG})
+    foreach(_file ${_tmp})
+        GET_FILENAME_COMPONENT(__destFile ${_file} NAME)
+        add_custom_command(
+            OUTPUT 
+                ${dest}/${__destFile}
+            COMMAND 
+                cmake -E copy_if_different ${_file} ${dest}/${__destFile}
+            DEPENDS
+                ${_file}
+        )
+        LIST(APPEND soFilesToCopy "${dest}/${__destFile}")
+    endforeach()
 endmacro()
 macro(CopyImportTargetTools target dest)
 	get_property(_tmp TARGET ${target} PROPERTY INTERFACE_TOOLS_${TS_CONFIG})
