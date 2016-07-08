@@ -102,7 +102,7 @@ py::tuple Connector::sendJsonRequest(const std::string& verb, const std::string&
 
 	if (inDataTmp.FromJSON(inData.c_str()) <= 0)
 	{
-		return py::make_tuple(false, "", 0);
+		return py::make_tuple(false, "inData is not valid.", 0);
 	}
 
 	if (!conn->sendJsonRequest(verb.c_str(), cmd.c_str(), inDataTmp, outDataTmp, status))
